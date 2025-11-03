@@ -5,14 +5,23 @@
 
 <PageTitle>BlazzyCarousel Demo</PageTitle>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
-    <h1>BlazzyCarousel</h1>
-    <p>A beautiful 3D carousel with glass morphism design</p>
-   
+<div style="
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 60px 20px;
+">
+    <h1 style="margin-bottom: 10px;">BlazzyCarousel</h1>
+    <p style="margin-bottom: 40px; opacity: 0.85;">A beautiful 3D carousel with glass morphism design</p>
+
     <BzCarousel TItem="Movie"
                 Items="items"
-                OnItemSelected="@OnItemSelected"
-               >
+                Theme="BzTheme.Light"
+                OnItemSelected="@OnItemSelected">
         <ItemTemplate Context="item">
             <img src="@item.ImageUrl" alt="@item.Title" />
         </ItemTemplate>
@@ -20,7 +29,7 @@
 
     @if (selectedMovie != null)
     {
-        <div style="text-align: center; margin-top: 30px; color: white;">
+        <div style="text-align: center; margin-top: 30px;">
             <h3>Selected: @selectedMovie.Title</h3>
         </div>
     }

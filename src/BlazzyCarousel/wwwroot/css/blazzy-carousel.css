@@ -1,29 +1,31 @@
 ﻿/* ═══════════════════════════════════════════════════════════
-   BlazzyCarousel - Global Styles
+   BlazzyCarousel - Global Styles (PREMIUM VERSION)
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-    --bzc-border-radius: 10px;
-    --bzc-padding: 20px;
+    /* Base values */
+    --bzc-border-radius: 12px;
+    --bzc-padding: 24px;
     --bzc-min-height: 400px;
     --bzc-transition-speed: 0.3s;
-    --bzc-glass-bg: rgba(0, 0, 0, 0.4);
-    --bzc-glass-shadow: 20px 20px 50px rgba(0, 0, 0, 0.5);
-    --bzc-dark-bg: rgba(18, 18, 18, 0.95);
-    --bzc-dark-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+
+    /* Glass Theme - Netflix style */
+    --bzc-glass-bg: rgba(15, 15, 15, 0.6);
+    --bzc-glass-border: rgba(255, 255, 255, 0.15);
+    --bzc-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --bzc-glass-blur: 12px;
+
+    /* Dark Theme - Premium dashboard */
+    --bzc-dark-bg: linear-gradient(135deg, rgba(20, 20, 25, 0.98), rgba(30, 30, 35, 0.98));
+    --bzc-dark-border: rgba(255, 255, 255, 0.08);
+    --bzc-dark-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    --bzc-dark-glow: 0 0 20px rgba(100, 100, 255, 0.1);
+
+    /* Light Theme - Clean Apple style */
     --bzc-light-bg: rgba(255, 255, 255, 0.95);
-    --bzc-light-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   WRAPPER
-   ═══════════════════════════════════════════════════════════ */
-
-.bzc-carousel-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    --bzc-light-border: rgba(0, 0, 0, 0.08);
+    --bzc-light-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    --bzc-light-inner-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -40,12 +42,14 @@
     color: rgba(255, 255, 255, 0.8);
     text-align: center;
     padding: 40px;
+    margin: 0 auto;
+    max-width: 800px;
 }
 
 .bzc-spinner {
     width: 50px;
     height: 50px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
+    border: 4px solid rgba(255, 255, 255, 0.2);
     border-top-color: #fff;
     border-radius: 50%;
     animation: bzc-spin 1s linear infinite;
@@ -57,10 +61,8 @@
     }
 }
 
-
-
 /* ═══════════════════════════════════════════════════════════
-   CAROUSEL BOX - Base styles (all themes)
+   CAROUSEL BOX - Base styles
    ═══════════════════════════════════════════════════════════ */
 
 .bzc-carousel-box {
@@ -71,47 +73,102 @@
     padding: var(--bzc-padding);
     overflow: hidden;
     width: 100%;
-    max-width: 750px; /* 800px */
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    transition: all var(--bzc-transition-speed) ease;
 }
 
-
-
-    /* ═══════════════════════════════════════════════════════════
-   GLASS THEME
+/* ═══════════════════════════════════════════════════════════
+   GLASS THEME 
    ═══════════════════════════════════════════════════════════ */
 
-    .bzc-carousel-box.bzc-theme-glass {
-        background: var(--bzc-glass-bg);
-        box-shadow: var(--bzc-glass-shadow);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
+.bzc-carousel-box.bzc-theme-glass {
+    background: var(--bzc-glass-bg);
+    box-shadow: var(--bzc-glass-shadow);
+    backdrop-filter: blur(var(--bzc-glass-blur));
+    -webkit-backdrop-filter: blur(var(--bzc-glass-blur));
+    border: 1px solid var(--bzc-glass-border);
+}
 
-    /* ═══════════════════════════════════════════════════════════
-   DARK THEME
+.bzc-carousel-box.bzc-theme-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent);
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DARK THEME 
    ═══════════════════════════════════════════════════════════ */
 
-    .bzc-carousel-box.bzc-theme-dark {
-        background: var(--bzc-dark-bg);
-        box-shadow: var(--bzc-dark-shadow);
-    }
+.bzc-carousel-box.bzc-theme-dark {
+    background: var(--bzc-dark-bg);
+    box-shadow: var(--bzc-dark-shadow), var(--bzc-dark-glow);
+    border: 1px solid var(--bzc-dark-border);
+}
 
-    /* ═══════════════════════════════════════════════════════════
-   LIGHT THEME
+.bzc-carousel-box.bzc-theme-dark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--bzc-border-radius);
+    padding: 1px;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1),
+            transparent,
+            rgba(255, 255, 255, 0.05));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT THEME 
    ═══════════════════════════════════════════════════════════ */
 
-    .bzc-carousel-box.bzc-theme-light {
-        background: var(--bzc-light-bg);
-        box-shadow: var(--bzc-light-shadow);
-    }
+.bzc-carousel-box.bzc-theme-light {
+    background: var(--bzc-light-bg);
+    box-shadow: var(--bzc-light-shadow), var(--bzc-light-inner-shadow);
+    border: 1px solid var(--bzc-light-border);
+}
 
-    /* ═══════════════════════════════════════════════════════════
-   MINIMAL THEME
+.bzc-carousel-box.bzc-theme-light::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--bzc-border-radius);
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.8),
+            rgba(255, 255, 255, 0));
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Light theme - dark text for loading/empty states */
+.bzc-carousel-box.bzc-theme-light~.bzc-loading,
+.bzc-carousel-box.bzc-theme-light~.bzc-empty {
+    color: rgba(0, 0, 0, 0.7);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MINIMAL THEME 
    ═══════════════════════════════════════════════════════════ */
 
-    .bzc-carousel-box.bzc-theme-minimal {
-        background: transparent;
-    }
+.bzc-carousel-box.bzc-theme-minimal {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+}
 
 /* ═══════════════════════════════════════════════════════════
    SWIPER CONTAINER
@@ -121,7 +178,11 @@
     width: 100%;
     height: 400px;
     perspective: 1500px;
-    /*overflow: visible;*/
+    overflow: visible !important;
+}
+
+.swiper-wrapper {
+    overflow: visible !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -131,6 +192,7 @@
 @media (max-width: 991px) {
     .bzc-carousel-box {
         max-width: 750px;
+        padding: 20px;
     }
 
     .swiper-container {
