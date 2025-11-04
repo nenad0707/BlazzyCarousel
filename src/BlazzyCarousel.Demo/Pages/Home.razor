@@ -18,14 +18,7 @@
     <h1 style="margin-bottom: 10px;">BlazzyCarousel</h1>
     <p style="margin-bottom: 40px; opacity: 0.85;">A beautiful 3D carousel with glass morphism design</p>
 
-    <BzCarousel TItem="Movie"
-                Items="items"
-                Theme="BzTheme.Glass"
-                OnItemSelected="@OnItemSelected">
-        <ItemTemplate Context="item">
-            <img src="@item.ImageUrl" alt="@item.Title" />
-        </ItemTemplate>
-    </BzCarousel>
+    <BzCarousel Items="items" />
 
     @if (selectedMovie != null)
     {

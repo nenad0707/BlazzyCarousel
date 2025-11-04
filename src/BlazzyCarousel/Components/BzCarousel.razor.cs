@@ -2,6 +2,8 @@
 using BlazzyCarousel.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace BlazzyCarousel.Components;
 
@@ -21,9 +23,10 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
 
     /// <summary>
     /// Template for rendering each carousel item.
+    /// If not provided, will attempt to use auto-generated template from [BzImage] attribute.
     /// </summary>
-    [Parameter, EditorRequired]
-    public RenderFragment<TItem> ItemTemplate { get; set; } = default!;
+    [Parameter]
+    public RenderFragment<TItem>? ItemTemplate { get; set; }
 
     /// <summary>
     /// Callback invoked when an item is clicked/selected.
@@ -124,6 +127,18 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
     private BzCarouselJsInterop? jsInterop;
     private bool initialized = false;
 
+    /// <summary>
+    /// Static cache for generated templates (shared across all instances).
+    /// Thread-safe via ConcurrentDictionary.
+    /// </summary>
+    private static readonly ConcurrentDictionary<Type, RenderFragment<object>?>
+        _generatedTemplateCache = new();
+
+    /// <summary>
+    /// Instance-level cache for effective template.
+    /// </summary>
+    private RenderFragment<TItem>? _cachedEffectiveTemplate;
+
     #endregion
 
     #region Properties
@@ -157,9 +172,38 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Gets the effective template with caching.
+    /// Priority: Manual > Generated > Fallback
+    /// </summary>
+    private RenderFragment<TItem> EffectiveTemplate
+    {
+        get
+        {
+            if (_cachedEffectiveTemplate != null)
+                return _cachedEffectiveTemplate;
+
+            _cachedEffectiveTemplate = ComputeEffectiveTemplate();
+            return _cachedEffectiveTemplate;
+        }
+    }
+
     #endregion
 
     #region Lifecycle Methods
+
+    /// <summary>
+    /// Invalidate cache when ItemTemplate changes.
+    /// </summary>
+    protected override void OnParametersSet()
+    {
+        if (ItemTemplate != null)
+        {
+            _cachedEffectiveTemplate = null;
+        }
+
+        base.OnParametersSet();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -238,6 +282,87 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
             await OnItemSelected.InvokeAsync(item);
         }
     }
+
+    /// <summary>
+    /// Computes effective template using priority system.
+    /// Priority: Manual > Generated > Fallback
+    /// </summary>
+    private RenderFragment<TItem> ComputeEffectiveTemplate()
+    {
+        // Priority 1: User-provided manual template
+        if (ItemTemplate != null)
+            return ItemTemplate;
+
+        // Priority 2: Source-generated template
+        var generated = TryGetGeneratedTemplateWithCache();
+        if (generated != null)
+            return generated;
+
+        // Priority 3: Fallback template
+        return FallbackTemplate;
+    }
+
+    /// <summary>
+    /// Attempts to get source-generated template with caching.
+    /// Uses reflection to find generated extension method.
+    /// </summary>
+    private RenderFragment<TItem>? TryGetGeneratedTemplateWithCache()
+    {
+        var itemType = typeof(TItem);
+
+        // Check static cache (shared across all instances)
+        if (_generatedTemplateCache.TryGetValue(itemType, out var cached))
+        {
+            return cached as RenderFragment<TItem>;
+        }
+
+        // Cache miss - use reflection (only happens once per type)
+        RenderFragment<TItem>? result = null;
+
+        try
+        {
+            // Build extension class name: MovieBzCarouselExtensions
+            var extensionsTypeName = $"{itemType.Namespace}.{itemType.Name}BzCarouselExtensions";
+
+            // Try to find the type in same assembly as TItem
+            var extensionsType = itemType.Assembly.GetType(extensionsTypeName);
+
+            if (extensionsType != null)
+            {
+                // Find the static method
+                var method = extensionsType.GetMethod(
+                    "GetDefaultBzCarouselTemplate",
+                    BindingFlags.Public | BindingFlags.Static);
+
+                if (method != null)
+                {
+                    // Invoke static method to get RenderFragment
+                    result = method.Invoke(null, null) as RenderFragment<TItem>;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Not finding generated template is OK - will use fallback
+            Console.WriteLine($"[BzCarousel] Source Generator template not found for {itemType.Name}: {ex.Message}");
+        }
+
+        // Store in cache (even if null to prevent repeated reflection attempts)
+        _generatedTemplateCache.TryAdd(itemType, result as RenderFragment<object>);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Fallback template when no manual template and no [BzImage] attribute.
+    /// </summary>
+    private RenderFragment<TItem> FallbackTemplate => item => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "bzc-fallback-item");
+        builder.AddContent(2, item?.ToString() ?? "[null]");
+        builder.CloseElement();
+    };
 
     #endregion
 

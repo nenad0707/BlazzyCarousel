@@ -31,7 +31,7 @@ else if (IsEmpty)
 }
 else
 {
-    <div class="bzc-carousel-box @ThemeClass @CssClass" 
+    <div class="bzc-carousel-box @ThemeClass @CssClass"
          @ref="carouselRef"
          data-item-count="@ItemCount">
         <div class="swiper-container">
@@ -39,7 +39,7 @@ else
                 @foreach (var item in Items!)
                 {
                     <div class="swiper-slide" @onclick="() => HandleItemClick(item)">
-                        @ItemTemplate(item)
+                        @EffectiveTemplate(item)
                         @if (ShowOverlay)
                         {
                             <div class="bzc-overlay"></div>
