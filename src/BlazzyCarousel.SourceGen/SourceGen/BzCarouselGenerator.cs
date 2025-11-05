@@ -1,99 +1,109 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 
-namespace BlazzyCarousel.SourceGen.SourceGen;
-
-/// <summary>
-/// Incremental Source Generator that creates default carousel templates 
-/// for types decorated with [BzImage] attribute.
-/// </summary>
-/// <remarks>
-/// <para>
-/// This generator runs at compile-time and produces extension methods
-/// that provide default RenderFragment implementations for carousel items.
-/// </para>
-/// <para>
-/// Generated code pattern:
-/// <code>
-/// public static class {ClassName}BzCarouselExtensions
-/// {
-///     public static RenderFragment&lt;{ClassName}&gt; GetDefaultBzCarouselTemplate()
-///     {
-///         return item => builder => { /* img element */ };
-///     }
-/// }
-/// </code>
-/// </para>
-/// <para>
-/// <strong>Performance:</strong>
-/// - Compile-time code generation (zero runtime overhead for generation)
-/// - Generated code is cached in static dictionary at runtime
-/// - Reflection used only once per type to locate generated method
-/// </para>
-/// <para>
-/// <strong>Supported Attributes:</strong>
-/// - [BzImage] (required): Marks the property containing image URL
-/// - [BzTitle] (optional): Marks the property for alt/title text
-/// - [BzDescription] (optional): Reserved for future use
-/// </para>
-/// </remarks>
-[Generator]
-public class BzCarouselGenerator : IIncrementalGenerator
+#if !NET5_0_OR_GREATER
+namespace System.Runtime.CompilerServices
 {
-    // ═════════════════════════════════════════════════════════════
-    // CONSTANTS
-    // ═════════════════════════════════════════════════════════════
+    // This type is required for record types and init-only setters in C# 9+
+    internal static class IsExternalInit { }
+}
+#endif
 
+namespace BlazzyCarousel.SourceGen.SourceGen
+{
     /// <summary>
-    /// Fully-qualified name of the BzImage attribute.
-    /// Using full name prevents conflicts with user's own attributes.
+    /// Incremental Source Generator that creates default carousel templates 
+    /// for types decorated with [BzImage] attribute.
     /// </summary>
-    private const string BzImageAttributeFullName = "BlazzyCarousel.Attributes.BzImageAttribute";
-
-    /// <summary>
-    /// Fully-qualified name of the BzTitle attribute.
-    /// </summary>
-    private const string BzTitleAttributeFullName = "BlazzyCarousel.Attributes.BzTitleAttribute";
-
-    /// <summary>
-    /// Fully-qualified name of the BzDescription attribute.
-    /// </summary>
-    private const string BzDescriptionAttributeFullName = "BlazzyCarousel.Attributes.BzDescriptionAttribute";
-
-    // ═════════════════════════════════════════════════════════════
-    // INITIALIZE
-    // ═════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Initializes the incremental generator pipeline.
-    /// </summary>
-    /// <param name="context">Generator initialization context</param>
     /// <remarks>
     /// <para>
-    /// This method sets up a three-stage pipeline:
-    /// 1. Post-initialization: Generates a marker file for debugging
-    /// 2. Syntax filtering: Quick filter to find candidate classes
-    /// 3. Semantic analysis: Detailed analysis of candidates
-    /// 4. Code generation: Produces extension methods
+    /// This generator runs at compile-time and produces extension methods
+    /// that provide default RenderFragment implementations for carousel items.
     /// </para>
     /// <para>
-    /// The incremental API ensures that:
-    /// - Only changed files are reprocessed
-    /// - Results are cached between compilations
-    /// - Performance scales well with large codebases
+    /// Generated code pattern:
+    /// <code>
+    /// public static class {ClassName}BzCarouselExtensions
+    /// {
+    ///     public static RenderFragment&lt;{ClassName}&gt; GetDefaultBzCarouselTemplate()
+    ///     {
+    ///         return item => builder => { /* img element */ };
+    ///     }
+    /// }
+    /// </code>
+    /// </para>
+    /// <para>
+    /// <strong>Performance:</strong>
+    /// - Compile-time code generation (zero runtime overhead for generation)
+    /// - Generated code is cached in static dictionary at runtime
+    /// - Reflection used only once per type to locate generated method
+    /// </para>
+    /// <para>
+    /// <strong>Supported Attributes:</strong>
+    /// - [BzImage] (required): Marks the property containing image URL
+    /// - [BzTitle] (optional): Marks the property for alt/title text
+    /// - [BzDescription] (optional): Reserved for future use
     /// </para>
     /// </remarks>
-    public void Initialize(IncrementalGeneratorInitializationContext context)
+    [Generator]
+    public class BzCarouselGenerator : IIncrementalGenerator
     {
-        // ─────────────────────────────────────────────────────────
-        // STEP 1: Register marker file for debugging
-        // ─────────────────────────────────────────────────────────
-        context.RegisterPostInitializationOutput(ctx =>
+        // ═════════════════════════════════════════════════════════════
+        // CONSTANTS
+        // ═════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Fully-qualified name of the BzImage attribute.
+        /// Using full name prevents conflicts with user's own attributes.
+        /// </summary>
+        private const string BzImageAttributeFullName = "BlazzyCarousel.Attributes.BzImageAttribute";
+
+        /// <summary>
+        /// Fully-qualified name of the BzTitle attribute.
+        /// </summary>
+        private const string BzTitleAttributeFullName = "BlazzyCarousel.Attributes.BzTitleAttribute";
+
+        /// <summary>
+        /// Fully-qualified name of the BzDescription attribute.
+        /// </summary>
+        private const string BzDescriptionAttributeFullName = "BlazzyCarousel.Attributes.BzDescriptionAttribute";
+
+        // ═════════════════════════════════════════════════════════════
+        // INITIALIZE
+        // ═════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Initializes the incremental generator pipeline.
+        /// </summary>
+        /// <param name="context">Generator initialization context</param>
+        /// <remarks>
+        /// <para>
+        /// This method sets up a three-stage pipeline:
+        /// 1. Post-initialization: Generates a marker file for debugging
+        /// 2. Syntax filtering: Quick filter to find candidate classes
+        /// 3. Semantic analysis: Detailed analysis of candidates
+        /// 4. Code generation: Produces extension methods
+        /// </para>
+        /// <para>
+        /// The incremental API ensures that:
+        /// - Only changed files are reprocessed
+        /// - Results are cached between compilations
+        /// - Performance scales well with large codebases
+        /// </para>
+        /// </remarks>
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            ctx.AddSource("BzCarouselGenerator.Marker.g.cs", SourceText.From(@"
+            // ─────────────────────────────────────────────────────────
+            // STEP 1: Register marker file for debugging
+            // ─────────────────────────────────────────────────────────
+            context.RegisterPostInitializationOutput(ctx =>
+            {
+                ctx.AddSource("BzCarouselGenerator.Marker.g.cs", SourceText.From(@"
 // <auto-generated/>
 // This file is generated by BlazzyCarousel Source Generator
 // to verify the generator is running correctly.
@@ -117,573 +127,574 @@ namespace BlazzyCarousel.SourceGen
     }
 }
 ", Encoding.UTF8));
-        });
+            });
 
-        // ─────────────────────────────────────────────────────────
-        // STEP 2: Create incremental pipeline
-        // ─────────────────────────────────────────────────────────
-        var classDeclarations = context.SyntaxProvider
-            .CreateSyntaxProvider(
-                // Predicate: Fast syntax-level filter
-                predicate: static (syntaxNode, _) => IsSyntaxTargetForGeneration(syntaxNode),
+            // ─────────────────────────────────────────────────────────
+            // STEP 2: Create incremental pipeline
+            // ─────────────────────────────────────────────────────────
+            var classDeclarations = context.SyntaxProvider
+                .CreateSyntaxProvider(
+                    // Predicate: Fast syntax-level filter
+                    predicate: static (syntaxNode, _) => IsSyntaxTargetForGeneration(syntaxNode),
 
-                // Transform: Detailed semantic analysis
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
+                    // Transform: Detailed semantic analysis
+                    transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
 
-            // Filter out nulls (classes without [BzImage])
-            .Where(static classInfo => classInfo is not null);
+                // Filter out nulls (classes without [BzImage])
+                .Where(static classInfo => classInfo is not null);
 
-        // ─────────────────────────────────────────────────────────
-        // STEP 3: Combine with compilation
-        // ─────────────────────────────────────────────────────────
-        var compilationAndClasses = context.CompilationProvider
-            .Combine(classDeclarations.Collect());
+            // ─────────────────────────────────────────────────────────
+            // STEP 3: Combine with compilation
+            // ─────────────────────────────────────────────────────────
+            var compilationAndClasses = context.CompilationProvider
+                .Combine(classDeclarations.Collect());
 
-        // ─────────────────────────────────────────────────────────
-        // STEP 4: Register source generation
-        // ─────────────────────────────────────────────────────────
-        context.RegisterSourceOutput(
-            compilationAndClasses,
-            static (sourceContext, source) => Execute(source.Left, source.Right!, sourceContext));
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    // SYNTAX FILTER (Fast Predicate)
-    // ═════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Performs quick syntax-level check to filter candidate nodes.
-    /// This runs on EVERY syntax node, so must be extremely fast!
-    /// </summary>
-    /// <param name="syntaxNode">Syntax node to check</param>
-    /// <returns>True if node is a potential candidate for generation</returns>
-    /// <remarks>
-    /// <para>
-    /// This method performs only syntax-based checks (no semantic analysis).
-    /// It filters out ~99% of nodes that definitely don't need code generation.
-    /// </para>
-    /// <para>
-    /// Performance: ~0.001ms per node (syntax tree traversal only)
-    /// </para>
-    /// </remarks>
-    private static bool IsSyntaxTargetForGeneration(SyntaxNode syntaxNode)
-    {
-        // Only interested in class declarations
-        if (syntaxNode is not ClassDeclarationSyntax classDeclaration)
-            return false;
-
-        // Quick check: Does the class have any properties?
-        // If not, it can't have [BzImage] attribute on a property
-        var hasProperties = classDeclaration.Members
-            .OfType<PropertyDeclarationSyntax>()
-            .Any();
-
-        return hasProperties;
-    }
-
-    // ═════════════════════════════════════════════════════════════
-    // SEMANTIC ANALYSIS (Detailed Transform)
-    // ═════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Performs detailed semantic analysis on candidate classes.
-    /// Only runs on classes that passed the syntax filter.
-    /// </summary>
-    /// <param name="context">Generator syntax context with semantic model</param>
-    /// <returns>ClassToGenerate info if class has valid [BzImage], null otherwise</returns>
-    /// <remarks>
-    /// <para>
-    /// This method performs semantic analysis including:
-    /// - Attribute resolution (finding [BzImage], [BzTitle], [BzDescription])
-    /// - Type information (property types, accessibility)
-    /// - Inheritance scanning (base class properties)
-    /// - Validation (public string properties only)
-    /// </para>
-    /// <para>
-    /// Note: Diagnostics are collected and will be reported in Execute phase.
-    /// We cannot report them here because GeneratorSyntaxContext doesn't have ReportDiagnostic.
-    /// </para>
-    /// <para>
-    /// Performance: ~5ms per candidate class (semantic model queries)
-    /// </para>
-    /// </remarks>
-    private static ClassToGenerate? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
-    {
-        var classDeclaration = (ClassDeclarationSyntax)context.Node;
-
-        // Get semantic model (type information)
-        var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
-
-        if (classSymbol is null)
-            return null;
-
-        // Find properties with our attributes (including inherited)
-        var imagePropertyInfo = FindPropertyWithAttribute(classSymbol, BzImageAttributeFullName);
-        var titlePropertyInfo = FindPropertyWithAttribute(classSymbol, BzTitleAttributeFullName);
-        var descriptionPropertyInfo = FindPropertyWithAttribute(classSymbol, BzDescriptionAttributeFullName);
-
-        // If no [BzImage] found, skip this class
-        if (imagePropertyInfo is null)
-            return null;
-
-        // ─────────────────────────────────────────────────────────
-        // VALIDATION: Check if [BzImage] property is valid
-        // ─────────────────────────────────────────────────────────
-        var imagePropertySymbol = imagePropertyInfo.Value.Symbol;
-        var diagnostics = new List<DiagnosticInfo>();
-
-        // ─────────────────────────────────────────────────────────
-        // VALIDATION 1: Must be public
-        // ─────────────────────────────────────────────────────────
-        if (imagePropertySymbol.DeclaredAccessibility != Accessibility.Public)
-        {
-            diagnostics.Add(new DiagnosticInfo(
-                Id: "BZC001",
-                Title: "BzImage attribute on non-public property",
-                Message: $"Property '{imagePropertySymbol.Name}' with [BzImage] attribute must be public. Change accessibility to 'public' or remove the [BzImage] attribute.",
-                Location: imagePropertySymbol.Locations.FirstOrDefault(),
-                Severity: DiagnosticSeverity.Error
-            ));
-
-            // Don't generate code for invalid property, but store diagnostic
-            return new ClassToGenerate(
-                Namespace: classSymbol.ContainingNamespace.ToDisplayString(),
-                ClassName: classSymbol.Name,
-                FullyQualifiedName: classSymbol.ToDisplayString(),
-                ImageProperty: null,
-                TitleProperty: null,
-                DescriptionProperty: null,
-                Diagnostics: diagnostics
-            );
+            // ─────────────────────────────────────────────────────────
+            // STEP 4: Register source generation
+            // ─────────────────────────────────────────────────────────
+            context.RegisterSourceOutput(
+                compilationAndClasses,
+                static (sourceContext, source) => Execute(source.Left, source.Right!, sourceContext));
         }
 
-        // ─────────────────────────────────────────────────────────
-        // VALIDATION 2: Must be string type
-        // ─────────────────────────────────────────────────────────
-        if (imagePropertySymbol.Type.SpecialType != SpecialType.System_String)
-        {
-            diagnostics.Add(new DiagnosticInfo(
-                Id: "BZC002",
-                Title: "BzImage attribute on non-string property",
-                Message: $"Property '{imagePropertySymbol.Name}' with [BzImage] attribute must be of type 'string'. Found type '{imagePropertySymbol.Type.ToDisplayString()}' instead.",
-                Location: imagePropertySymbol.Locations.FirstOrDefault(),
-                Severity: DiagnosticSeverity.Error
-            ));
+        // ═════════════════════════════════════════════════════════════
+        // SYNTAX FILTER (Fast Predicate)
+        // ═════════════════════════════════════════════════════════════
 
-            // Don't generate code for invalid property, but store diagnostic
-            return new ClassToGenerate(
-                Namespace: classSymbol.ContainingNamespace.ToDisplayString(),
-                ClassName: classSymbol.Name,
-                FullyQualifiedName: classSymbol.ToDisplayString(),
-                ImageProperty: null,
-                TitleProperty: null,
-                DescriptionProperty: null,
-                Diagnostics: diagnostics
-            );
+        /// <summary>
+        /// Performs quick syntax-level check to filter candidate nodes.
+        /// This runs on EVERY syntax node, so must be extremely fast!
+        /// </summary>
+        /// <param name="syntaxNode">Syntax node to check</param>
+        /// <returns>True if node is a potential candidate for generation</returns>
+        /// <remarks>
+        /// <para>
+        /// This method performs only syntax-based checks (no semantic analysis).
+        /// It filters out ~99% of nodes that definitely don't need code generation.
+        /// </para>
+        /// <para>
+        /// Performance: ~0.001ms per node (syntax tree traversal only)
+        /// </para>
+        /// </remarks>
+        private static bool IsSyntaxTargetForGeneration(SyntaxNode syntaxNode)
+        {
+            // Only interested in class declarations
+            if (syntaxNode is not ClassDeclarationSyntax classDeclaration)
+                return false;
+
+            // Quick check: Does the class have any properties?
+            // If not, it can't have [BzImage] attribute on a property
+            var hasProperties = classDeclaration.Members
+                .OfType<PropertyDeclarationSyntax>()
+                .Any();
+
+            return hasProperties;
         }
 
-        // All validation passed! Create data object for code generation
-        return new ClassToGenerate(
-            Namespace: classSymbol.ContainingNamespace.ToDisplayString(),
-            ClassName: classSymbol.Name,
-            FullyQualifiedName: classSymbol.ToDisplayString(),
-            ImageProperty: imagePropertyInfo.Value.Name,
-            TitleProperty: titlePropertyInfo?.Name,
-            DescriptionProperty: descriptionPropertyInfo?.Name,
-            Diagnostics: diagnostics
-        );
-    }
+        // ═════════════════════════════════════════════════════════════
+        // SEMANTIC ANALYSIS (Detailed Transform)
+        // ═════════════════════════════════════════════════════════════
 
-    // ═════════════════════════════════════════════════════════════
-    // FIND PROPERTY WITH ATTRIBUTE (Supports Inheritance)
-    // ═════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Finds a property decorated with the specified attribute.
-    /// Recursively searches base classes to support inherited properties.
-    /// </summary>
-    /// <param name="classSymbol">Class symbol to search</param>
-    /// <param name="attributeFullName">Fully-qualified attribute name to find</param>
-    /// <returns>Property info (name and symbol) if found, null otherwise</returns>
-    /// <remarks>
-    /// <para>
-    /// This method supports inheritance by recursively scanning base classes.
-    /// For example:
-    /// <code>
-    /// public class BaseMedia
-    /// {
-    ///     [BzImage]
-    ///     public string Image { get; set; }
-    /// }
-    /// 
-    /// public class Movie : BaseMedia
-    /// {
-    ///     public string Title { get; set; }
-    /// }
-    /// </code>
-    /// When scanning Movie, it will find the [BzImage] attribute on Image property
-    /// in the BaseMedia class.
-    /// </para>
-    /// </remarks>
-    private static PropertyInfo? FindPropertyWithAttribute(INamedTypeSymbol classSymbol, string attributeFullName)
-    {
-        // Search through all members in current class
-        foreach (var member in classSymbol.GetMembers())
+        /// <summary>
+        /// Performs detailed semantic analysis on candidate classes.
+        /// Only runs on classes that passed the syntax filter.
+        /// </summary>
+        /// <param name="context">Generator syntax context with semantic model</param>
+        /// <returns>ClassToGenerate info if class has valid [BzImage], null otherwise</returns>
+        /// <remarks>
+        /// <para>
+        /// This method performs semantic analysis including:
+        /// - Attribute resolution (finding [BzImage], [BzTitle], [BzDescription])
+        /// - Type information (property types, accessibility)
+        /// - Inheritance scanning (base class properties)
+        /// - Validation (public string properties only)
+        /// </para>
+        /// <para>
+        /// Note: Diagnostics are collected and will be reported in Execute phase.
+        /// We cannot report them here because GeneratorSyntaxContext doesn't have ReportDiagnostic.
+        /// </para>
+        /// <para>
+        /// Performance: ~5ms per candidate class (semantic model queries)
+        /// </para>
+        /// </remarks>
+        private static ClassToGenerate? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
         {
-            if (member is not IPropertySymbol property)
-                continue;
+            var classDeclaration = (ClassDeclarationSyntax)context.Node;
 
-            var hasAttribute = property.GetAttributes()
-                .Any(attr => attr.AttributeClass?.ToDisplayString() == attributeFullName);
+            // Get semantic model (type information)
+            var classSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
 
-            if (hasAttribute)
-                return new PropertyInfo(property.Name, property);
-        }
+            if (classSymbol is null)
+                return null;
 
-        // Check base class
-        var baseType = classSymbol.BaseType;
-        if (baseType is not null && baseType.SpecialType != SpecialType.System_Object)
-        {
-            return FindPropertyWithAttribute(baseType, attributeFullName);
-        }
+            // Find properties with our attributes (including inherited)
+            var imagePropertyInfo = FindPropertyWithAttribute(classSymbol, BzImageAttributeFullName);
+            var titlePropertyInfo = FindPropertyWithAttribute(classSymbol, BzTitleAttributeFullName);
+            var descriptionPropertyInfo = FindPropertyWithAttribute(classSymbol, BzDescriptionAttributeFullName);
 
-        return null;
-    }
+            // If no [BzImage] found, skip this class
+            if (imagePropertyInfo is null)
+                return null;
 
+            // ─────────────────────────────────────────────────────────
+            // VALIDATION: Check if [BzImage] property is valid
+            // ─────────────────────────────────────────────────────────
+            var imagePropertySymbol = imagePropertyInfo.Value.Symbol;
+            var diagnostics = new List<DiagnosticInfo>();
 
-
-    // ═════════════════════════════════════════════════════════════
-    // CODE GENERATION EXECUTION
-    // ═════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Generates source code for all classes with [BzImage] attribute.
-    /// </summary>
-    /// <param name="compilation">Current compilation context</param>
-    /// <param name="classes">Collection of classes that need code generation</param>
-    /// <param name="context">Source production context for adding generated files and diagnostics</param>
-    /// <remarks>
-    /// <para>
-    /// This method:
-    /// 1. Iterates through all classes that passed validation
-    /// 2. Reports any diagnostics (errors/warnings)
-    /// 3. Generates C# source code for extension methods
-    /// 4. Adds generated files to the compilation
-    /// </para>
-    /// <para>
-    /// Generated files follow naming convention: {ClassName}.BzCarousel.g.cs
-    /// The .g.cs suffix indicates auto-generated code.
-    /// </para>
-    /// </remarks>
-    private static void Execute(
-        Compilation compilation,
-        ImmutableArray<ClassToGenerate?> classes,
-        SourceProductionContext context)
-    {
-        if (classes.IsEmpty)
-            return;
-
-        foreach (var classInfo in classes.Distinct())
-        {
-            if (classInfo is null)
-                continue;
-
-            // ─────────────────────────────────────────────────────
-            // REPORT DIAGNOSTICS (Errors/Warnings)
-            // ─────────────────────────────────────────────────────
-            foreach (var diagnosticInfo in classInfo.Diagnostics)
+            // ─────────────────────────────────────────────────────────
+            // VALIDATION 1: Must be public
+            // ─────────────────────────────────────────────────────────
+            if (imagePropertySymbol.DeclaredAccessibility != Accessibility.Public)
             {
-                var descriptor = new DiagnosticDescriptor(
-                    id: diagnosticInfo.Id,
-                    title: diagnosticInfo.Title,
-                    messageFormat: diagnosticInfo.Message,
-                    category: "BlazzyCarousel.SourceGenerator",
-                    defaultSeverity: diagnosticInfo.Severity,
-                    isEnabledByDefault: true,
-                    description: diagnosticInfo.Message,
-                    helpLinkUri: "https://github.com/nenad0707/BlazzyCarousel#validation");
+                diagnostics.Add(new DiagnosticInfo(
+                    Id: "BZC001",
+                    Title: "BzImage attribute on non-public property",
+                    Message: $"Property '{imagePropertySymbol.Name}' with [BzImage] attribute must be public. Change accessibility to 'public' or remove the [BzImage] attribute.",
+                    Location: imagePropertySymbol.Locations.FirstOrDefault(),
+                    Severity: DiagnosticSeverity.Error
+                ));
 
-                var diagnostic = Diagnostic.Create(descriptor, diagnosticInfo.Location);
-                context.ReportDiagnostic(diagnostic);
+                // Don't generate code for invalid property, but store diagnostic
+                return new ClassToGenerate(
+                    Namespace: classSymbol.ContainingNamespace.ToDisplayString(),
+                    ClassName: classSymbol.Name,
+                    FullyQualifiedName: classSymbol.ToDisplayString(),
+                    ImageProperty: null,
+                    TitleProperty: null,
+                    DescriptionProperty: null,
+                    Diagnostics: diagnostics
+                );
             }
 
-            // ─────────────────────────────────────────────────────
-            // SKIP CODE GENERATION IF VALIDATION FAILED
-            // ─────────────────────────────────────────────────────
-            if (classInfo.ImageProperty is null || classInfo.Diagnostics.Any())
-                continue;
+            // ─────────────────────────────────────────────────────────
+            // VALIDATION 2: Must be string type
+            // ─────────────────────────────────────────────────────────
+            if (imagePropertySymbol.Type.SpecialType != SpecialType.System_String)
+            {
+                diagnostics.Add(new DiagnosticInfo(
+                    Id: "BZC002",
+                    Title: "BzImage attribute on non-string property",
+                    Message: $"Property '{imagePropertySymbol.Name}' with [BzImage] attribute must be of type 'string'. Found type '{imagePropertySymbol.Type.ToDisplayString()}' instead.",
+                    Location: imagePropertySymbol.Locations.FirstOrDefault(),
+                    Severity: DiagnosticSeverity.Error
+                ));
 
-            // ─────────────────────────────────────────────────────
-            // GENERATE SOURCE CODE
-            // ─────────────────────────────────────────────────────
-            var sourceCode = GenerateExtensionClass(classInfo);
+                // Don't generate code for invalid property, but store diagnostic
+                return new ClassToGenerate(
+                    Namespace: classSymbol.ContainingNamespace.ToDisplayString(),
+                    ClassName: classSymbol.Name,
+                    FullyQualifiedName: classSymbol.ToDisplayString(),
+                    ImageProperty: null,
+                    TitleProperty: null,
+                    DescriptionProperty: null,
+                    Diagnostics: diagnostics
+                );
+            }
 
-            // Create unique filename
-            var hintName = $"{classInfo.ClassName}.BzCarousel.g.cs";
-
-            // Add to compilation
-            context.AddSource(hintName, SourceText.From(sourceCode, Encoding.UTF8));
+            // All validation passed! Create data object for code generation
+            return new ClassToGenerate(
+                Namespace: classSymbol.ContainingNamespace.ToDisplayString(),
+                ClassName: classSymbol.Name,
+                FullyQualifiedName: classSymbol.ToDisplayString(),
+                ImageProperty: imagePropertyInfo.Value.Name,
+                TitleProperty: titlePropertyInfo?.Name,
+                DescriptionProperty: descriptionPropertyInfo?.Name,
+                Diagnostics: diagnostics
+            );
         }
-    }
 
-    // ═════════════════════════════════════════════════════════════
-    // GENERATE EXTENSION CLASS (StringBuilder Code Generation)
-    // ═════════════════════════════════════════════════════════════
+        // ═════════════════════════════════════════════════════════════
+        // FIND PROPERTY WITH ATTRIBUTE (Supports Inheritance)
+        // ═════════════════════════════════════════════════════════════
 
-    /// <summary>
-    /// Generates the actual C# source code for extension methods.
-    /// </summary>
-    /// <param name="classInfo">Information about the class to generate code for</param>
-    /// <returns>Complete C# source code as string</returns>
-    /// <remarks>
-    /// <para>
-    /// Generated code structure:
-    /// <code>
-    /// namespace {Namespace}
-    /// {
-    ///     public static class {ClassName}BzCarouselExtensions
-    ///     {
-    ///         public static RenderFragment&lt;{ClassName}&gt; GetDefaultBzCarouselTemplate()
-    ///         {
-    ///             return item => builder =>
-    ///             {
-    ///                 // Null checks
-    ///                 // img element generation
-    ///                 // Alt/title attributes
-    ///             };
-    ///         }
-    ///     }
-    /// }
-    /// </code>
-    /// </para>
-    /// <para>
-    /// The generated code includes:
-    /// - Null safety checks (item, imageUrl)
-    /// - RenderTreeBuilder calls (OpenElement, AddAttribute, CloseElement)
-    /// - Accessibility attributes (alt, title)
-    /// - XML documentation
-    /// </para>
-    /// </remarks>
-    private static string GenerateExtensionClass(ClassToGenerate classInfo)
-    {
-        var sb = new StringBuilder();
-
-        // ─────────────────────────────────────────────────────────
-        // FILE HEADER
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine("// <auto-generated/>");
-        sb.AppendLine("// Generated by BlazzyCarousel Source Generator v1.0.0");
-        sb.AppendLine($"// Class: {classInfo.ClassName}");
-        sb.AppendLine($"// Image Property: {classInfo.ImageProperty}");
-        if (classInfo.TitleProperty != null)
-            sb.AppendLine($"// Title Property: {classInfo.TitleProperty}");
-        if (classInfo.DescriptionProperty != null)
-            sb.AppendLine($"// Description Property: {classInfo.DescriptionProperty}");
-        sb.AppendLine();
-        sb.AppendLine("#nullable enable");
-        sb.AppendLine();
-
-        // ─────────────────────────────────────────────────────────
-        // USING STATEMENTS
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine("using Microsoft.AspNetCore.Components;");
-        sb.AppendLine("using Microsoft.AspNetCore.Components.Rendering;");
-        sb.AppendLine();
-
-        // ─────────────────────────────────────────────────────────
-        // NAMESPACE
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine($"namespace {classInfo.Namespace}");
-        sb.AppendLine("{");
-
-        // ─────────────────────────────────────────────────────────
-        // CLASS XML DOCUMENTATION
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine("    /// <summary>");
-        sb.AppendLine($"    /// Auto-generated carousel extension methods for <see cref=\"{classInfo.ClassName}\"/>.");
-        sb.AppendLine("    /// </summary>");
-        sb.AppendLine("    /// <remarks>");
-        sb.AppendLine("    /// <para>");
-        sb.AppendLine("    /// This class is automatically generated by BlazzyCarousel Source Generator");
-        sb.AppendLine($"    /// and provides a default template that renders <see cref=\"{classInfo.ClassName}.{classInfo.ImageProperty}\"/> as an image element.");
-        sb.AppendLine("    /// </para>");
-        sb.AppendLine("    /// <para>");
-        sb.AppendLine("    /// <strong>Usage:</strong>");
-        sb.AppendLine("    /// <code>");
-        sb.AppendLine($"    /// &lt;BzCarousel Items=\"{classInfo.ClassName.ToLower()}s\" /&gt;");
-        sb.AppendLine("    /// // No ItemTemplate needed - auto-generated!");
-        sb.AppendLine("    /// </code>");
-        sb.AppendLine("    /// </para>");
-        sb.AppendLine("    /// </remarks>");
-
-        // ─────────────────────────────────────────────────────────
-        // CLASS DECLARATION
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine($"    public static class {classInfo.ClassName}BzCarouselExtensions");
-        sb.AppendLine("    {");
-
-        // ─────────────────────────────────────────────────────────
-        // METHOD XML DOCUMENTATION
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine("        /// <summary>");
-        sb.AppendLine($"        /// Gets the default carousel item template for <see cref=\"{classInfo.ClassName}\"/>.");
-        sb.AppendLine("        /// </summary>");
-        sb.AppendLine("        /// <returns>");
-        sb.AppendLine($"        /// A <see cref=\"RenderFragment{{TItem}}\"/> that renders <see cref=\"{classInfo.ClassName}.{classInfo.ImageProperty}\"/>");
-        sb.AppendLine("        /// as an img element with appropriate accessibility attributes.");
-        sb.AppendLine("        /// </returns>");
-        sb.AppendLine("        /// <remarks>");
-        sb.AppendLine("        /// <para>");
-        sb.AppendLine("        /// This method is called by BlazzyCarousel at runtime using reflection.");
-        sb.AppendLine("        /// The result is cached in a static dictionary for performance.");
-        sb.AppendLine("        /// </para>");
-        sb.AppendLine("        /// <para>");
-        sb.AppendLine("        /// The generated template includes:");
-        sb.AppendLine("        /// <list type=\"bullet\">");
-        sb.AppendLine("        /// <item>Null safety checks</item>");
-        sb.AppendLine($"        /// <item>Image rendering from {classInfo.ImageProperty} property</item>");
-        if (classInfo.TitleProperty != null)
+        /// <summary>
+        /// Finds a property decorated with the specified attribute.
+        /// Recursively searches base classes to support inherited properties.
+        /// </summary>
+        /// <param name="classSymbol">Class symbol to search</param>
+        /// <param name="attributeFullName">Fully-qualified attribute name to find</param>
+        /// <returns>Property info (name and symbol) if found, null otherwise</returns>
+        /// <remarks>
+        /// <para>
+        /// This method supports inheritance by recursively scanning base classes.
+        /// For example:
+        /// <code>
+        /// public class BaseMedia
+        /// {
+        ///     [BzImage]
+        ///     public string Image { get; set; }
+        /// }
+        /// 
+        /// public class Movie : BaseMedia
+        /// {
+        ///     public string Title { get; set; }
+        /// }
+        /// </code>
+        /// When scanning Movie, it will find the [BzImage] attribute on Image property
+        /// in the BaseMedia class.
+        /// </para>
+        /// </remarks>
+        private static PropertyInfo? FindPropertyWithAttribute(INamedTypeSymbol classSymbol, string attributeFullName)
         {
-            sb.AppendLine($"        /// <item>Alt/title attributes from {classInfo.TitleProperty} property</item>");
+            // Search through all members in current class
+            foreach (var member in classSymbol.GetMembers())
+            {
+                if (member is not IPropertySymbol property)
+                    continue;
+
+                var hasAttribute = property.GetAttributes()
+                    .Any(attr => attr.AttributeClass?.ToDisplayString() == attributeFullName);
+
+                if (hasAttribute)
+                    return new PropertyInfo(property.Name, property);
+            }
+
+            // Check base class
+            var baseType = classSymbol.BaseType;
+            if (baseType is not null && baseType.SpecialType != SpecialType.System_Object)
+            {
+                return FindPropertyWithAttribute(baseType, attributeFullName);
+            }
+
+            return null;
         }
-        else
+
+
+
+        // ═════════════════════════════════════════════════════════════
+        // CODE GENERATION EXECUTION
+        // ═════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Generates source code for all classes with [BzImage] attribute.
+        /// </summary>
+        /// <param name="compilation">Current compilation context</param>
+        /// <param name="classes">Collection of classes that need code generation</param>
+        /// <param name="context">Source production context for adding generated files and diagnostics</param>
+        /// <remarks>
+        /// <para>
+        /// This method:
+        /// 1. Iterates through all classes that passed validation
+        /// 2. Reports any diagnostics (errors/warnings)
+        /// 3. Generates C# source code for extension methods
+        /// 4. Adds generated files to the compilation
+        /// </para>
+        /// <para>
+        /// Generated files follow naming convention: {ClassName}.BzCarousel.g.cs
+        /// The .g.cs suffix indicates auto-generated code.
+        /// </para>
+        /// </remarks>
+        private static void Execute(
+            Compilation compilation,
+            ImmutableArray<ClassToGenerate?> classes,
+            SourceProductionContext context)
         {
-            sb.AppendLine($"        /// <item>Generic alt attribute (\"{classInfo.ClassName}\")</item>");
+            if (classes.IsEmpty)
+                return;
+
+            foreach (var classInfo in classes.Distinct())
+            {
+                if (classInfo is null)
+                    continue;
+
+                // ─────────────────────────────────────────────────────
+                // REPORT DIAGNOSTICS (Errors/Warnings)
+                // ─────────────────────────────────────────────────────
+                foreach (var diagnosticInfo in classInfo.Diagnostics)
+                {
+                    var descriptor = new DiagnosticDescriptor(
+                        id: diagnosticInfo.Id,
+                        title: diagnosticInfo.Title,
+                        messageFormat: diagnosticInfo.Message,
+                        category: "BlazzyCarousel.SourceGenerator",
+                        defaultSeverity: diagnosticInfo.Severity,
+                        isEnabledByDefault: true,
+                        description: diagnosticInfo.Message,
+                        helpLinkUri: "https://github.com/nenad0707/BlazzyCarousel#validation");
+
+                    var diagnostic = Diagnostic.Create(descriptor, diagnosticInfo.Location);
+                    context.ReportDiagnostic(diagnostic);
+                }
+
+                // ─────────────────────────────────────────────────────
+                // SKIP CODE GENERATION IF VALIDATION FAILED
+                // ─────────────────────────────────────────────────────
+                if (classInfo.ImageProperty is null || classInfo.Diagnostics.Any())
+                    continue;
+
+                // ─────────────────────────────────────────────────────
+                // GENERATE SOURCE CODE
+                // ─────────────────────────────────────────────────────
+                var sourceCode = GenerateExtensionClass(classInfo);
+
+                // Create unique filename
+                var hintName = $"{classInfo.ClassName}.BzCarousel.g.cs";
+
+                // Add to compilation
+                context.AddSource(hintName, SourceText.From(sourceCode, Encoding.UTF8));
+            }
         }
-        sb.AppendLine("        /// </list>");
-        sb.AppendLine("        /// </para>");
-        sb.AppendLine("        /// </remarks>");
 
-        // ─────────────────────────────────────────────────────────
-        // METHOD SIGNATURE
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine($"        public static RenderFragment<{classInfo.ClassName}> GetDefaultBzCarouselTemplate()");
-        sb.AppendLine("        {");
+        // ═════════════════════════════════════════════════════════════
+        // GENERATE EXTENSION CLASS (StringBuilder Code Generation)
+        // ═════════════════════════════════════════════════════════════
 
-        // ─────────────────────────────────────────────────────────
-        // RENDER FRAGMENT LAMBDA
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine("            return item => builder =>");
-        sb.AppendLine("            {");
-
-        // NULL CHECK: Item
-        sb.AppendLine("                // Null safety: Skip null items");
-        sb.AppendLine("                if (item is null)");
-        sb.AppendLine("                {");
-        sb.AppendLine("                    return;");
-        sb.AppendLine("                }");
-        sb.AppendLine();
-
-        // EXTRACT PROPERTY VALUES
-        sb.AppendLine("                // Extract property values");
-        sb.AppendLine($"                var imageUrl = item.{classInfo.ImageProperty};");
-        if (classInfo.TitleProperty != null)
+        /// <summary>
+        /// Generates the actual C# source code for extension methods.
+        /// </summary>
+        /// <param name="classInfo">Information about the class to generate code for</param>
+        /// <returns>Complete C# source code as string</returns>
+        /// <remarks>
+        /// <para>
+        /// Generated code structure:
+        /// <code>
+        /// namespace {Namespace}
+        /// {
+        ///     public static class {ClassName}BzCarouselExtensions
+        ///     {
+        ///         public static RenderFragment&lt;{ClassName}&gt; GetDefaultBzCarouselTemplate()
+        ///         {
+        ///             return item => builder =>
+        ///             {
+        ///                 // Null checks
+        ///                 // img element generation
+        ///                 // Alt/title attributes
+        ///             };
+        ///         }
+        ///     }
+        /// }
+        /// </code>
+        /// </para>
+        /// <para>
+        /// The generated code includes:
+        /// - Null safety checks (item, imageUrl)
+        /// - RenderTreeBuilder calls (OpenElement, AddAttribute, CloseElement)
+        /// - Accessibility attributes (alt, title)
+        /// - XML documentation
+        /// </para>
+        /// </remarks>
+        private static string GenerateExtensionClass(ClassToGenerate classInfo)
         {
-            sb.AppendLine($"                var title = item.{classInfo.TitleProperty};");
-        }
-        sb.AppendLine();
+            var sb = new StringBuilder();
 
-        // NULL CHECK: Image URL
-        sb.AppendLine("                // Null safety: Skip if image URL is empty");
-        sb.AppendLine("                if (string.IsNullOrWhiteSpace(imageUrl))");
-        sb.AppendLine("                {");
-        sb.AppendLine("                    return;");
-        sb.AppendLine("                }");
-        sb.AppendLine();
-
-        // RENDER IMG ELEMENT
-        sb.AppendLine("                // Render img element using RenderTreeBuilder");
-        sb.AppendLine("                builder.OpenElement(0, \"img\");");
-        sb.AppendLine("                builder.AddAttribute(1, \"src\", imageUrl);");
-
-        // ADD ALT/TITLE ATTRIBUTES
-        if (classInfo.TitleProperty != null)
-        {
+            // ─────────────────────────────────────────────────────────
+            // FILE HEADER
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine("// <auto-generated/>");
+            sb.AppendLine("// Generated by BlazzyCarousel Source Generator v1.0.0");
+            sb.AppendLine($"// Class: {classInfo.ClassName}");
+            sb.AppendLine($"// Image Property: {classInfo.ImageProperty}");
+            if (classInfo.TitleProperty != null)
+                sb.AppendLine($"// Title Property: {classInfo.TitleProperty}");
+            if (classInfo.DescriptionProperty != null)
+                sb.AppendLine($"// Description Property: {classInfo.DescriptionProperty}");
             sb.AppendLine();
-            sb.AppendLine("                // Add accessibility attributes from Title property");
-            sb.AppendLine("                if (!string.IsNullOrWhiteSpace(title))");
-            sb.AppendLine("                {");
-            sb.AppendLine("                    builder.AddAttribute(2, \"alt\", title);");
-            sb.AppendLine("                    builder.AddAttribute(3, \"title\", title);");
-            sb.AppendLine("                }");
-            sb.AppendLine("                else");
-            sb.AppendLine("                {");
-            sb.AppendLine("                    // Fallback: Use class name as alt text");
-            sb.AppendLine($"                    builder.AddAttribute(2, \"alt\", \"{classInfo.ClassName}\");");
-            sb.AppendLine("                }");
-        }
-        else
-        {
+            sb.AppendLine("#nullable enable");
             sb.AppendLine();
-            sb.AppendLine("                // Add generic alt text (no Title property found)");
-            sb.AppendLine($"                builder.AddAttribute(2, \"alt\", \"{classInfo.ClassName}\");");
+
+            // ─────────────────────────────────────────────────────────
+            // USING STATEMENTS
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine("using Microsoft.AspNetCore.Components;");
+            sb.AppendLine("using Microsoft.AspNetCore.Components.Rendering;");
+            sb.AppendLine();
+
+            // ─────────────────────────────────────────────────────────
+            // NAMESPACE
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine($"namespace {classInfo.Namespace}");
+            sb.AppendLine("{");
+
+            // ─────────────────────────────────────────────────────────
+            // CLASS XML DOCUMENTATION
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine("    /// <summary>");
+            sb.AppendLine($"    /// Auto-generated carousel extension methods for <see cref=\"{classInfo.ClassName}\"/>.");
+            sb.AppendLine("    /// </summary>");
+            sb.AppendLine("    /// <remarks>");
+            sb.AppendLine("    /// <para>");
+            sb.AppendLine("    /// This class is automatically generated by BlazzyCarousel Source Generator");
+            sb.AppendLine($"    /// and provides a default template that renders <see cref=\"{classInfo.ClassName}.{classInfo.ImageProperty}\"/> as an image element.");
+            sb.AppendLine("    /// </para>");
+            sb.AppendLine("    /// <para>");
+            sb.AppendLine("    /// <strong>Usage:</strong>");
+            sb.AppendLine("    /// <code>");
+            sb.AppendLine($"    /// &lt;BzCarousel Items=\"{classInfo.ClassName.ToLower()}s\" /&gt;");
+            sb.AppendLine("    /// // No ItemTemplate needed - auto-generated!");
+            sb.AppendLine("    /// </code>");
+            sb.AppendLine("    /// </para>");
+            sb.AppendLine("    /// </remarks>");
+
+            // ─────────────────────────────────────────────────────────
+            // CLASS DECLARATION
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine($"    public static class {classInfo.ClassName}BzCarouselExtensions");
+            sb.AppendLine("    {");
+
+            // ─────────────────────────────────────────────────────────
+            // METHOD XML DOCUMENTATION
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine("        /// <summary>");
+            sb.AppendLine($"        /// Gets the default carousel item template for <see cref=\"{classInfo.ClassName}\"/>.");
+            sb.AppendLine("        /// </summary>");
+            sb.AppendLine("        /// <returns>");
+            sb.AppendLine($"        /// A <see cref=\"RenderFragment{{TItem}}\"/> that renders <see cref=\"{classInfo.ClassName}.{classInfo.ImageProperty}\"/>");
+            sb.AppendLine("        /// as an img element with appropriate accessibility attributes.");
+            sb.AppendLine("        /// </returns>");
+            sb.AppendLine("        /// <remarks>");
+            sb.AppendLine("        /// <para>");
+            sb.AppendLine("        /// This method is called by BlazzyCarousel at runtime using reflection.");
+            sb.AppendLine("        /// The result is cached in a static dictionary for performance.");
+            sb.AppendLine("        /// </para>");
+            sb.AppendLine("        /// <para>");
+            sb.AppendLine("        /// The generated template includes:");
+            sb.AppendLine("        /// <list type=\"bullet\">");
+            sb.AppendLine("        /// <item>Null safety checks</item>");
+            sb.AppendLine($"        /// <item>Image rendering from {classInfo.ImageProperty} property</item>");
+            if (classInfo.TitleProperty != null)
+            {
+                sb.AppendLine($"        /// <item>Alt/title attributes from {classInfo.TitleProperty} property</item>");
+            }
+            else
+            {
+                sb.AppendLine($"        /// <item>Generic alt attribute (\"{classInfo.ClassName}\")</item>");
+            }
+            sb.AppendLine("        /// </list>");
+            sb.AppendLine("        /// </para>");
+            sb.AppendLine("        /// </remarks>");
+
+            // ─────────────────────────────────────────────────────────
+            // METHOD SIGNATURE
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine($"        public static RenderFragment<{classInfo.ClassName}> GetDefaultBzCarouselTemplate()");
+            sb.AppendLine("        {");
+
+            // ─────────────────────────────────────────────────────────
+            // RENDER FRAGMENT LAMBDA
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine("            return item => builder =>");
+            sb.AppendLine("            {");
+
+            // NULL CHECK: Item
+            sb.AppendLine("                // Null safety: Skip null items");
+            sb.AppendLine("                if (item is null)");
+            sb.AppendLine("                {");
+            sb.AppendLine("                    return;");
+            sb.AppendLine("                }");
+            sb.AppendLine();
+
+            // EXTRACT PROPERTY VALUES
+            sb.AppendLine("                // Extract property values");
+            sb.AppendLine($"                var imageUrl = item.{classInfo.ImageProperty};");
+            if (classInfo.TitleProperty != null)
+            {
+                sb.AppendLine($"                var title = item.{classInfo.TitleProperty};");
+            }
+            sb.AppendLine();
+
+            // NULL CHECK: Image URL
+            sb.AppendLine("                // Null safety: Skip if image URL is empty");
+            sb.AppendLine("                if (string.IsNullOrWhiteSpace(imageUrl))");
+            sb.AppendLine("                {");
+            sb.AppendLine("                    return;");
+            sb.AppendLine("                }");
+            sb.AppendLine();
+
+            // RENDER IMG ELEMENT
+            sb.AppendLine("                // Render img element using RenderTreeBuilder");
+            sb.AppendLine("                builder.OpenElement(0, \"img\");");
+            sb.AppendLine("                builder.AddAttribute(1, \"src\", imageUrl);");
+
+            // ADD ALT/TITLE ATTRIBUTES
+            if (classInfo.TitleProperty != null)
+            {
+                sb.AppendLine();
+                sb.AppendLine("                // Add accessibility attributes from Title property");
+                sb.AppendLine("                if (!string.IsNullOrWhiteSpace(title))");
+                sb.AppendLine("                {");
+                sb.AppendLine("                    builder.AddAttribute(2, \"alt\", title);");
+                sb.AppendLine("                    builder.AddAttribute(3, \"title\", title);");
+                sb.AppendLine("                }");
+                sb.AppendLine("                else");
+                sb.AppendLine("                {");
+                sb.AppendLine("                    // Fallback: Use class name as alt text");
+                sb.AppendLine($"                    builder.AddAttribute(2, \"alt\", \"{classInfo.ClassName}\");");
+                sb.AppendLine("                }");
+            }
+            else
+            {
+                sb.AppendLine();
+                sb.AppendLine("                // Add generic alt text (no Title property found)");
+                sb.AppendLine($"                builder.AddAttribute(2, \"alt\", \"{classInfo.ClassName}\");");
+            }
+
+            sb.AppendLine();
+            sb.AppendLine("                builder.CloseElement();");
+            sb.AppendLine("            };");
+            sb.AppendLine("        }");
+
+            // ─────────────────────────────────────────────────────────
+            // CLOSE CLASS
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine("    }");
+
+            // ─────────────────────────────────────────────────────────
+            // CLOSE NAMESPACE
+            // ─────────────────────────────────────────────────────────
+            sb.AppendLine("}");
+
+            return sb.ToString();
         }
 
-        sb.AppendLine();
-        sb.AppendLine("                builder.CloseElement();");
-        sb.AppendLine("            };");
-        sb.AppendLine("        }");
+        // ═════════════════════════════════════════════════════════════
+        // DATA CLASSES
+        // ═════════════════════════════════════════════════════════════
 
-        // ─────────────────────────────────────────────────────────
-        // CLOSE CLASS
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine("    }");
+        /// <summary>
+        /// Information about a property found with an attribute.
+        /// </summary>
+        private readonly record struct PropertyInfo(string Name, IPropertySymbol Symbol);
 
-        // ─────────────────────────────────────────────────────────
-        // CLOSE NAMESPACE
-        // ─────────────────────────────────────────────────────────
-        sb.AppendLine("}");
+        /// <summary>
+        /// Information about a diagnostic to report.
+        /// </summary>
+        private sealed record DiagnosticInfo(
+            string Id,
+            string Title,
+            string Message,
+            Location? Location,
+            DiagnosticSeverity Severity
+        );
 
-        return sb.ToString();
+        /// <summary>
+        /// Data class holding information about a class that needs code generation.
+        /// </summary>
+        /// <param name="Namespace">The namespace of the class (e.g., "MyApp.Models")</param>
+        /// <param name="ClassName">The simple class name (e.g., "Movie")</param>
+        /// <param name="FullyQualifiedName">The fully-qualified name (e.g., "MyApp.Models.Movie")</param>
+        /// <param name="ImageProperty">Name of property with [BzImage] attribute (required, null if validation failed)</param>
+        /// <param name="TitleProperty">Name of property with [BzTitle] attribute (optional)</param>
+        /// <param name="DescriptionProperty">Name of property with [BzDescription] attribute (optional, reserved for future use)</param>
+        /// <param name="Diagnostics">List of diagnostics (errors/warnings) to report</param>
+        /// <remarks>
+        /// <para>
+        /// This is an immutable record used to pass information from semantic analysis
+        /// to code generation. Using a record provides:
+        /// - Value-based equality
+        /// - Immutability
+        /// - Concise syntax
+        /// - Built-in ToString() for debugging
+        /// </para>
+        /// </remarks>
+        private sealed record ClassToGenerate(
+            string Namespace,
+            string ClassName,
+            string FullyQualifiedName,
+            string? ImageProperty,
+            string? TitleProperty,
+            string? DescriptionProperty,
+            List<DiagnosticInfo> Diagnostics
+        );
     }
-
-    // ═════════════════════════════════════════════════════════════
-    // DATA CLASSES
-    // ═════════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Information about a property found with an attribute.
-    /// </summary>
-    private readonly record struct PropertyInfo(string Name, IPropertySymbol Symbol);
-
-    /// <summary>
-    /// Information about a diagnostic to report.
-    /// </summary>
-    private sealed record DiagnosticInfo(
-        string Id,
-        string Title,
-        string Message,
-        Location? Location,
-        DiagnosticSeverity Severity
-    );
-
-    /// <summary>
-    /// Data class holding information about a class that needs code generation.
-    /// </summary>
-    /// <param name="Namespace">The namespace of the class (e.g., "MyApp.Models")</param>
-    /// <param name="ClassName">The simple class name (e.g., "Movie")</param>
-    /// <param name="FullyQualifiedName">The fully-qualified name (e.g., "MyApp.Models.Movie")</param>
-    /// <param name="ImageProperty">Name of property with [BzImage] attribute (required, null if validation failed)</param>
-    /// <param name="TitleProperty">Name of property with [BzTitle] attribute (optional)</param>
-    /// <param name="DescriptionProperty">Name of property with [BzDescription] attribute (optional, reserved for future use)</param>
-    /// <param name="Diagnostics">List of diagnostics (errors/warnings) to report</param>
-    /// <remarks>
-    /// <para>
-    /// This is an immutable record used to pass information from semantic analysis
-    /// to code generation. Using a record provides:
-    /// - Value-based equality
-    /// - Immutability
-    /// - Concise syntax
-    /// - Built-in ToString() for debugging
-    /// </para>
-    /// </remarks>
-    private sealed record ClassToGenerate(
-        string Namespace,
-        string ClassName,
-        string FullyQualifiedName,
-        string? ImageProperty,
-        string? TitleProperty,
-        string? DescriptionProperty,
-        List<DiagnosticInfo> Diagnostics
-    );
 }

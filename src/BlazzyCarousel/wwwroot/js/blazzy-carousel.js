@@ -93,22 +93,22 @@ export async function initializeCarousel(element, optionsJson) {
             return;
         }
 
-        
+
         console.log("[Diag] #1 slides now:", container.querySelectorAll(".swiper-slide").length,
             "containerWidth:", container.clientWidth);
 
-      
+
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-     
+
         console.log("[Diag] #2 slides after RAFx2:", container.querySelectorAll(".swiper-slide").length,
             "containerWidth:", container.clientWidth);
 
-     
+
         const images = Array.from(container.querySelectorAll("img"));
         await Promise.all(images.map(img => img.decode?.().catch(() => { }) || (img.complete ? Promise.resolve() : new Promise(res => img.onload = img.onerror = res))));
 
-        
+
         console.log("[Diag] #3 after images loaded:",
             container.querySelectorAll(".swiper-slide").length,
             "containerWidth:", container.clientWidth);
@@ -122,11 +122,11 @@ export async function initializeCarousel(element, optionsJson) {
         const slides = container.querySelectorAll(".swiper-slide");
         const slideCount = slides.length;
 
-       
+
         const enableLoop = slideCount > 3 && (options.loop ?? true);
         console.log("📊 Total slides before init:", container.querySelectorAll('.swiper-slide').length);
         const wrapper = container.querySelector('.swiper-wrapper');
-       
+
 
         swiperInstance = new Swiper(container, {
             effect: "coverflow",
@@ -142,9 +142,9 @@ export async function initializeCarousel(element, optionsJson) {
             observer: true,
             observeParents: true,
             coverflowEffect: {
-                rotate: 50,   
+                rotate: 50,
                 stretch: 0,
-                depth: 150,   
+                depth: 150,
                 modifier: 1.2,
                 slideShadows: true,
             },
@@ -160,41 +160,6 @@ export async function initializeCarousel(element, optionsJson) {
             }
         });
 
-
-        /* ============================================================
-   FIX: Ensure slide click always centers and triggers callback
-   ============================================================ */
-        swiperInstance.on("click", (swiper, event) => {
-            const slide = event.target.closest(".swiper-slide");
-            if (!slide) return;
-
-            const index = Array.from(container.querySelectorAll(".swiper-slide")).indexOf(slide);
-            if (index === -1) return;
-
-            
-            if (swiper.realIndex !== index) {
-                swiper.slideTo(index, 300);
-            }
-
-           
-            const item = slide.dataset.index;
-            if (item !== undefined) {
-                DotNet.invokeMethodAsync("BlazzyCarousel", "NotifyItemClick", parseInt(item));
-            }
-        });
-
-        container.querySelectorAll(".swiper-slide").forEach(slide => {
-            slide.addEventListener("click", (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-
-                const index = Array.from(container.querySelectorAll(".swiper-slide")).indexOf(slide);
-                if (index >= 0) {
-                    swiperInstance.slideTo(index, 300);
-                }
-            });
-        });
-
         console.log("[BlazzyCarousel] Carousel initialized successfully");
         console.log("[Diag] wrapper width:", container.querySelector(".swiper-wrapper").offsetWidth);
         container.querySelectorAll(".swiper-slide").forEach((s, i) => {
@@ -203,14 +168,6 @@ export async function initializeCarousel(element, optionsJson) {
     } catch (err) {
         console.error("[BlazzyCarousel] Initialization error:", err);
     }
-}
-
-
-/* -----------------------------
-   Accessors & cleanup
------------------------------ */
-export function getActiveIndex() {
-    return swiperInstance ? swiperInstance.realIndex ?? swiperInstance.activeIndex : 0;
 }
 
 export function destroyCarousel() {

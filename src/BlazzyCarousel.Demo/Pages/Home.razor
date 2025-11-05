@@ -25,9 +25,9 @@
                  OnItemSelected="@OnItemSelected">
                 @* Theme="BzTheme.Glass"
                 OnItemSelected="@OnItemSelected"> *@
-        <ItemTemplate Context="item">
+       @*  <ItemTemplate Context="item">
             <img src="@item.ImageUrl" alt="@item.Title" />
-        </ItemTemplate>
+        </ItemTemplate> *@
     </BzCarousel>
 
     @if (selectedMovie != null)
@@ -54,10 +54,10 @@
         }
     };
 
-     private async Task OnItemSelected(Movie selectedItem)
+     private  Task OnItemSelected(Movie selectedItem)
     {
         selectedMovie = selectedItem;
-        await JS.InvokeVoidAsync("console.log", $"Selected (JS): {selectedItem.Title}");
         Console.WriteLine($"Selected: {selectedItem.Title}");
+        return Task.CompletedTask;
     }
 }
