@@ -1,9 +1,9 @@
 ﻿let swiperLoaded = false;
 let swiperInstance = null;
 
-/* -----------------------------
+/* ═══════════════════════════════════════════════════════════
    Utility: Dynamic script loader
------------------------------ */
+   ═══════════════════════════════════════════════════════════ */
 function loadScript(src) {
     return new Promise((resolve, reject) => {
         const existing = document.querySelector(`script[src="${src}"]`);
@@ -42,9 +42,9 @@ function loadScript(src) {
     });
 }
 
-/* -----------------------------
+/* ═══════════════════════════════════════════════════════════
    Utility: Dynamic stylesheet loader
------------------------------ */
+   ═══════════════════════════════════════════════════════════ */
 function loadStylesheet(href) {
     return new Promise((resolve, reject) => {
         if (document.querySelector(`link[href="${href}"]`)) {
@@ -60,9 +60,9 @@ function loadStylesheet(href) {
     });
 }
 
-/* -----------------------------
+/* ═══════════════════════════════════════════════════════════
    Ensure Swiper is available
------------------------------ */
+   ═══════════════════════════════════════════════════════════ */
 export async function ensureSwiperLoaded() {
     if (swiperLoaded) return;
 
@@ -77,57 +77,32 @@ export async function ensureSwiperLoaded() {
     }
 
     swiperLoaded = true;
-    console.log("[BlazzyCarousel] Swiper library ready");
+    console.log("[BlazzyCarousel] Swiper library ready ✅");
 }
 
-/* -----------------------------
+/* ═══════════════════════════════════════════════════════════
    Initialize carousel
------------------------------ */
+   ═══════════════════════════════════════════════════════════ */
 export async function initializeCarousel(element, optionsJson) {
     try {
-        console.log("[BlazzyCarousel] Initializing carousel...");
-
         const container = element.querySelector(".swiper-container");
         if (!container) {
             console.error("[BlazzyCarousel] .swiper-container NOT FOUND");
             return;
         }
 
-
-        console.log("[Diag] #1 slides now:", container.querySelectorAll(".swiper-slide").length,
-            "containerWidth:", container.clientWidth);
-
-
+        // ✅ Čekaj da se DOM stabiliše
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-
-        console.log("[Diag] #2 slides after RAFx2:", container.querySelectorAll(".swiper-slide").length,
-            "containerWidth:", container.clientWidth);
-
-
-        const images = Array.from(container.querySelectorAll("img"));
-        await Promise.all(images.map(img => img.decode?.().catch(() => { }) || (img.complete ? Promise.resolve() : new Promise(res => img.onload = img.onerror = res))));
-
-
-        console.log("[Diag] #3 after images loaded:",
-            container.querySelectorAll(".swiper-slide").length,
-            "containerWidth:", container.clientWidth);
-
+        // ✅ Uništi stari instance ako postoji
         if (swiperInstance) {
             swiperInstance.destroy(true, true);
             swiperInstance = null;
         }
 
         const options = optionsJson ? JSON.parse(optionsJson) : {};
-        const slides = container.querySelectorAll(".swiper-slide");
-        const slideCount = slides.length;
 
-
-        const enableLoop = slideCount > 3 && (options.loop ?? true);
-        console.log("📊 Total slides before init:", container.querySelectorAll('.swiper-slide').length);
-        const wrapper = container.querySelector('.swiper-wrapper');
-
-
+        // ✅ Inicijalizuj Swiper
         swiperInstance = new Swiper(container, {
             effect: "coverflow",
             grabCursor: true,
@@ -149,7 +124,7 @@ export async function initializeCarousel(element, optionsJson) {
                 slideShadows: true,
             },
             on: {
-                init: () => console.log("[BlazzyCarousel] coverflow re-enabled ✅"),
+                init: () => console.log("[BlazzyCarousel] Carousel initialized ✅"),
                 setTranslate: function () {
                     this.slides.forEach(slide => {
                         if (parseInt(slide.style.zIndex) < 0) {
@@ -160,20 +135,18 @@ export async function initializeCarousel(element, optionsJson) {
             }
         });
 
-        console.log("[BlazzyCarousel] Carousel initialized successfully");
-        console.log("[Diag] wrapper width:", container.querySelector(".swiper-wrapper").offsetWidth);
-        container.querySelectorAll(".swiper-slide").forEach((s, i) => {
-            console.log(`[Diag] slide ${i}:`, s.getBoundingClientRect());
-        });
     } catch (err) {
         console.error("[BlazzyCarousel] Initialization error:", err);
     }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   Destroy carousel
+   ═══════════════════════════════════════════════════════════ */
 export function destroyCarousel() {
     if (swiperInstance) {
         swiperInstance.destroy(true, true);
         swiperInstance = null;
-        console.log("[BlazzyCarousel] Destroyed");
+        console.log("[BlazzyCarousel] Destroyed ✅");
     }
 }
