@@ -111,6 +111,9 @@ export async function initializeCarousel(element, optionsJson) {
 
         const options = optionsJson ? JSON.parse(optionsJson) : {};
 
+        const INIT_SPEED = 150;
+        const INTERACTION_SPEED = 300;
+
         swiperInstance = new Swiper(container, {
             effect: options.effect || "coverflow",
             grabCursor: options.grabCursor ?? true,
@@ -118,7 +121,7 @@ export async function initializeCarousel(element, optionsJson) {
             slidesPerView: options.slidesPerView || "auto",
             initialSlide: options.initialSlide || 0,
             loop: options.loop ?? true,
-            speed: 0,
+            speed: INIT_SPEED,
             slideToClickedSlide: true,
             watchSlidesProgress: true,
             watchSlidesVisibility: true,
@@ -134,8 +137,8 @@ export async function initializeCarousel(element, optionsJson) {
             on: {
                 init: function () {
                     setTimeout(() => {
-                        this.params.speed = userSpeed;
-                    }, 10);
+                        this.params.speed = INTERACTION_SPEED;
+                    }, 200);
                 },
                 setTranslate: function () {
                     this.slides.forEach(slide => {
