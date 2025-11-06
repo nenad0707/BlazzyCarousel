@@ -118,7 +118,7 @@ export async function initializeCarousel(element, optionsJson) {
             slidesPerView: options.slidesPerView || "auto",
             initialSlide: options.initialSlide || 0,
             loop: options.loop ?? true,
-            speed: options.speed || 300,
+            speed: 0,
             slideToClickedSlide: true,
             watchSlidesProgress: true,
             watchSlidesVisibility: true,
@@ -128,10 +128,15 @@ export async function initializeCarousel(element, optionsJson) {
                 rotate: options.rotateDegree || 50,
                 stretch: options.stretch || 0,
                 depth: options.depth || 150,
-                modifier: options.modifier || 1.2,
+                modifier: options.modifier || 1.5,
                 slideShadows: options.slideShadows ?? true,
             },
             on: {
+                init: function () {
+                    setTimeout(() => {
+                        this.params.speed = userSpeed;
+                    }, 10);
+                },
                 setTranslate: function () {
                     this.slides.forEach(slide => {
                         if (parseInt(slide.style.zIndex) < 0) {
@@ -139,6 +144,7 @@ export async function initializeCarousel(element, optionsJson) {
                         }
                     });
                 }
+
             }
         });
     } catch (err) {
