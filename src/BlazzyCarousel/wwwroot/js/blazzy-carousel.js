@@ -77,7 +77,6 @@ export async function ensureSwiperLoaded() {
     }
 
     swiperLoaded = true;
-    console.log("[BlazzyCarousel] Swiper library ready ✅");
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -95,6 +94,21 @@ export async function initializeCarousel(element, optionsJson) {
             swiperInstance.destroy(true, true);
             swiperInstance = null;
         }
+
+        const images = Array.from(container.querySelectorAll("img"));
+
+
+        await Promise.all(images.map(img => {
+
+            if (img.complete) {
+                return Promise.resolve();
+            }
+
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+        }));
 
         const options = optionsJson ? JSON.parse(optionsJson) : {};
 
