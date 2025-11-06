@@ -97,7 +97,6 @@ export async function initializeCarousel(element, optionsJson) {
 
         const images = Array.from(container.querySelectorAll("img"));
 
-
         await Promise.all(images.map(img => {
 
             if (img.complete) {
@@ -134,7 +133,6 @@ export async function initializeCarousel(element, optionsJson) {
             },
             on: {
                 setTranslate: function () {
-                    // Fix negative z-index slides
                     this.slides.forEach(slide => {
                         if (parseInt(slide.style.zIndex) < 0) {
                             slide.style.zIndex = 1;
