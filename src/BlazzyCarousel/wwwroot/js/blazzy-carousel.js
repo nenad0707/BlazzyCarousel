@@ -119,13 +119,16 @@ export async function initializeCarousel(element, optionsJson) {
             slidesPerView: options.slidesPerView || "auto",
             initialSlide: options.initialSlide || 0,
             loop: options.loop ?? true,
-            speed: 0,
+            loopAdditionalSlides: 2,
+            speed: options.speed || 300,
             runCallbacksOnInit: false,
             slideToClickedSlide: true,
             watchSlidesProgress: true,
             watchSlidesVisibility: true,
             observer: true,
             observeParents: true,
+            touchRatio: 1,
+            touchEventsTarget: 'container',
             coverflowEffect: {
                 rotate: options.rotateDegree || 50,
                 stretch: options.stretch || 0,
@@ -140,9 +143,11 @@ export async function initializeCarousel(element, optionsJson) {
                 },
                 setTranslate: function () {
                     this.slides.forEach(slide => {
-                        if (parseInt(slide.style.zIndex) < 0) {
-                            slide.style.zIndex = 1;
+                        const currentZ = parseInt(slide.style.zIndex);
+                        if (currentZ < 0 || isNaN(currentZ)) {
+                            slide.style.zIndex = '1';
                         }
+                        slide.style.pointerEvents = 'auto';
                     });
                 }
 
