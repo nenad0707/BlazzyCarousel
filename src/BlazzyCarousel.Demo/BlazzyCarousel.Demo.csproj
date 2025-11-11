@@ -6,16 +6,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <!-- Emit generated files from source generators into obj for inspection -->
+
   <PropertyGroup>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
+
+
   <ItemGroup>
-    <Content Remove="wwwroot\images\logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="wwwroot\images\logo.png" />
+    <ProjectReference Include="..\BlazzyCarousel\BlazzyCarousel.csproj" />
+    <ProjectReference Include="..\BlazzyCarousel.SourceGen\BlazzyCarousel.SourceGen.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,56 +25,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.19" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BlazzyCarousel\BlazzyCarousel.csproj" />
-    <ProjectReference Include="..\BlazzyCarousel.SourceGen\BlazzyCarousel.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
+  <PropertyGroup>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
   
-  <PropertyGroup>
-      <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-  </PropertyGroup>
-
   <ItemGroup>
-  <Content Include="wwwroot\images\**\*.*" CopyToOutputDirectory="Always" />
-</ItemGroup>
-</Project>
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-  <!-- Emit generated files from source generators into obj for inspection -->
-  <PropertyGroup>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
-  </PropertyGroup>
-  <ItemGroup>
-    <Content Remove="wwwroot\images\logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="wwwroot\images\logo.png" />
+    <Content Include="wwwroot\**\*.*" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.19" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.19" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BlazzyCarousel\BlazzyCarousel.csproj" />
-    <ProjectReference Include="..\BlazzyCarousel.SourceGen\BlazzyCarousel.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-  
-  <PropertyGroup>
-      <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="wwwroot\images\**\*.*" CopyToOutputDirectory="Always" />
-  </ItemGroup>
 </Project>
