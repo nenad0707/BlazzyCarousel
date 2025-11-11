@@ -25,18 +25,18 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore Dependencies
-        run: dotnet restore
+        run: dotnet restore BlazzyCarousel.sln
 
       - name: Build Solution
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build BlazzyCarousel.sln --configuration Release --no-restore
 
       - name: Publish Blazor WASM
-        run: dotnet publish BlazzyCarousel.Demo/BlazzyCarousel.Demo.csproj -c Release -o output
+        run: dotnet publish src/BlazzyCarousel.Demo/BlazzyCarousel.Demo.csproj -c Release -o output
 
       - name: Fix Base Href
         run: |
           sed -i 's|<base href="/" />|<base href="/BlazzyCarousel/" />|g' output/wwwroot/index.html
-          echo "Base href set to /BlazzyCarousel/"
+          echo "✅ Base href set to /BlazzyCarousel/"
 
       - name: Add .nojekyll
         run: touch output/wwwroot/.nojekyll
@@ -51,5 +51,5 @@ jobs:
 
       - name: Deployment Complete
         run: |
-          echo "Successfully deployed to GitHub Pages!"
-          echo "URL: https://nenad0707.github.io/BlazzyCarousel/"
+          echo "🎉 Successfully deployed to GitHub Pages!"
+          echo "🌐 URL: https://nenad0707.github.io/BlazzyCarousel/"
