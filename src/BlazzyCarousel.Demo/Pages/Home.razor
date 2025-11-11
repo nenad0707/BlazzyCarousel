@@ -101,18 +101,14 @@
                     <h3>Define Your Model</h3>
                 </div>
                 <div class="code-block">
-                    <pre><code>
-                        public class Movie
-                        {
-                            [BzImage]
-                            public string Poster { get; set; }
+                    <pre><code>public class Movie
+{
+    [BzImage]
+    public string Poster { get; set; }
 
-                            [BzTitle]
-                            public string Title { get; set; }
-                        }
-                    </code></pre>
+    public string Title { get; set; }
+}</code></pre>
                 </div>
-
             </div>
 
             <!-- Step 3: Use -->
@@ -144,16 +140,16 @@
     private Movie? selectedMovie;
 
     private List<Movie> movies = new()
-    {
-        new() { Title = "Despicable Me 4", ImageUrl = "images/despicableme.jpg" },
-        new() { Title = "Joker", ImageUrl = "images/joker.jpg" },
-        new() { Title = "The Platform 2", ImageUrl = "images/the-platform.jpg" },
-        new() { Title = "The Substance", ImageUrl = "images/thesubstance.jpg" },
-        new() { Title = "Venom", ImageUrl = "images/venom.jpg" },
-        new() { Title = "Survive", ImageUrl = "images/survive.jpg" },
-        new() { Title = "The Wild Robot", ImageUrl = "images/wild-robot.jpg" },
-        new() { Title = "Deadpool & Wolverine", ImageUrl = "images/wolwerine.jpg" }
-    };
+{
+new() { Title = "Despicable Me 4", ImageUrl = "images/despicableme.jpg" },
+new() { Title = "Joker", ImageUrl = "images/joker.jpg" },
+new() { Title = "The Platform 2", ImageUrl = "images/the-platform.jpg" },
+new() { Title = "The Substance", ImageUrl = "images/thesubstance.jpg" },
+new() { Title = "Venom", ImageUrl = "images/venom.jpg" },
+new() { Title = "Survive", ImageUrl = "images/survive.jpg" },
+new() { Title = "The Wild Robot", ImageUrl = "images/wild-robot.jpg" },
+new() { Title = "Deadpool & Wolverine", ImageUrl = "images/wolverine.jpg" }
+};
 
     private string heroBackgroundStyle => currentTheme switch
     {
