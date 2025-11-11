@@ -1,0 +1,85 @@
+name: Build, Test & Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run Unit Tests
+        run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: "**/test-results.trx"
+          reporter: dotnet-trx
+          fail-on-error: true
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish Blazor WASM
+        run: dotnet publish BlazzyCarousel.Demo/BlazzyCarousel.Demo.csproj -c Release -o output
+
+      - name: Fix Base Href
+        run: |
+          sed -i 's|<base href="/" />|<base href="/BlazzyCarousel/" />|g' output/wwwroot/index.html
+          echo "Base href set to /BlazzyCarousel/"
+
+      - name: Add .nojekyll
+        run: touch output/wwwroot/.nojekyll
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/wwwroot
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
+      - name: Deployment Complete
+        run: |
+          echo "Successfully deployed to GitHub Pages!"
+          echo "URL: https://nenad0707.github.io/BlazzyCarousel/"
