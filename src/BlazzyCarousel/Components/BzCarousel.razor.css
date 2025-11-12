@@ -11,8 +11,17 @@
 ::deep .swiper-container.bzc-visible {
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.4s ease-in,
-visibility 0.4s;
+    transition: opacity 0.4s ease-in, visibility 0.4s;
+}
+
+
+::deep .swiper-wrapper {
+    pointer-events: none !important;
+}
+
+::deep .swiper-slide {
+    pointer-events: auto !important;
+    z-index: 100 !important;
 }
 
 /* ───────────────────────────────────────────────────────────
@@ -42,7 +51,7 @@ visibility 0.4s;
 
 ::deep .swiper-slide img {
     max-width: var(--bzc-image-max-width);
-    width: 100% ;
+    width: 100%;
     height: auto;
     border-radius: 10px;
     object-fit: cover;
