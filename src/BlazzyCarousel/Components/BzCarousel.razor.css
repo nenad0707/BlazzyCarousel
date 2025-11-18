@@ -1,6 +1,4 @@
-﻿/* ───────────────────────────────────────────────────────────
-   SWIPER CONTAINER - Initial Hidden State (Scoped)
-   ─────────────────────────────────────────────────────────── */
+﻿/* SWIPER CONTAINER - Initial Hidden State (Scoped) */
 
 ::deep .swiper-container.bzc-hidden {
     opacity: 0 !important;
@@ -24,9 +22,7 @@
     z-index: 100 !important;
 }
 
-/* ───────────────────────────────────────────────────────────
-   SWIPER SLIDES
-   ─────────────────────────────────────────────────────────── */
+/* SWIPER SLIDES */
 
 ::deep .swiper-slide {
     width: var(--bzc-slide-width);
@@ -45,9 +41,7 @@
     outline-offset: 4px;
 }
 
-/* ───────────────────────────────────────────────────────────
-   IMAGES
-   ─────────────────────────────────────────────────────────── */
+/* IMAGES */
 
 ::deep .swiper-slide img {
     max-width: var(--bzc-image-max-width);
@@ -69,9 +63,7 @@
     transform: scale(var(--bzc-active-scale));
 }
 
-/* ───────────────────────────────────────────────────────────
-   OVERLAY
-   ─────────────────────────────────────────────────────────── */
+/* OVERLAY */
 
 .bzc-overlay {
     position: absolute;
@@ -82,4 +74,20 @@
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 100%);
     pointer-events: none;
     border-radius: 10px;
+}
+
+/*  FALLBACK ITEM (when no [BzImage] or ItemTemplate provided) */
+
+::deep .bzc-fallback-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    text-align: center;
 }

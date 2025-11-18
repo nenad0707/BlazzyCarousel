@@ -310,13 +310,11 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
     {
         var itemType = typeof(TItem);
 
-        // Check static cache (shared across all instances)
         if (_generatedTemplateCache.TryGetValue(itemType, out var cached))
         {
             return cached as RenderFragment<TItem>;
         }
 
-        // Cache miss - use reflection (only happens once per type)
         RenderFragment<TItem>? result = null;
 
         try
@@ -343,11 +341,9 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            // Not finding generated template is OK - will use fallback
             Console.WriteLine($"[BzCarousel] Source Generator template not found for {itemType.Name}: {ex.Message}");
         }
 
-        // Store in cache (even if null to prevent repeated reflection attempts)
         _generatedTemplateCache.TryAdd(itemType, result as RenderFragment<object>);
 
         return result;

@@ -173,7 +173,7 @@ namespace BlazzyCarousel.SourceGen
         /// It filters out ~99% of nodes that definitely don't need code generation.
         /// </para>
         /// <para>
-        /// Performance: ~0.001ms per node (syntax tree traversal only)
+        /// Performance: Fast (syntax tree traversal only — typically less than 1 ms per file).
         /// </para>
         /// </remarks>
         private static bool IsSyntaxTargetForGeneration(SyntaxNode syntaxNode)
