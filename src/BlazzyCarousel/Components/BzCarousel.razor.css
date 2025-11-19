@@ -17,11 +17,6 @@
     pointer-events: none !important;
 }
 
-::deep .swiper-slide {
-    pointer-events: auto !important;
-    z-index: 100 !important;
-}
-
 /* SWIPER SLIDES */
 
 ::deep .swiper-slide {
@@ -34,6 +29,8 @@
     border-radius: 10px;
     overflow: hidden;
     position: relative;
+    pointer-events: auto !important;
+    z-index: 100 !important;
 }
 
 ::deep .swiper-slide:focus-visible {
