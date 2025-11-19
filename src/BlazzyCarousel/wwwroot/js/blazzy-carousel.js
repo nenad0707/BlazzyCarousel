@@ -1,5 +1,5 @@
 ﻿let swiperLoaded = false;
-let swiperInstance = null;
+const swiperInstances = new Map();
 
 function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -105,17 +105,15 @@ export async function initializeCarousel(element, optionsJson) {
             return;
         }
 
-        if (swiperInstance) {
-            swiperInstance.destroy(true, true);
-            swiperInstance = null;
+        if (swiperInstances.has(element)) {
+            const instance = swiperInstances.get(element);
+            instance.destroy(true, true);
+            swiperInstances.delete(element);
         }
 
-        const options = optionsJson ? JSON.parse(optionsJson) : {}
+        const options = optionsJson ? JSON.parse(optionsJson) : {};
 
-            ;
-
-        swiperInstance = new Swiper(container, {
-
+        const swiperInstance = new Swiper(container, {
             effect: options.effect || "coverflow",
             grabCursor: options.grabCursor ?? true,
             centeredSlides: options.centeredSlides ?? true,
@@ -138,9 +136,7 @@ export async function initializeCarousel(element, optionsJson) {
                 depth: options.depth || 150,
                 modifier: options.modifier || 1.5,
                 slideShadows: options.slideShadows ?? true,
-            }
-
-            ,
+            },
             on: {
                 setTranslate: function () {
                     this.slides.forEach(slide => {
@@ -151,9 +147,7 @@ export async function initializeCarousel(element, optionsJson) {
                         }
 
                         slide.style.pointerEvents = 'auto';
-                    }
-
-                    );
+                    });
 
                     if (this.params.speed === 0) {
                         this.params.speed = 300;
@@ -162,25 +156,30 @@ export async function initializeCarousel(element, optionsJson) {
                         setTimeout(() => {
                             this.el.classList.remove('bzc-hidden');
                             this.el.classList.add('bzc-visible');
-                        }
-
-                            , 100);
+                        }, 100);
                     }
                 }
             }
-        }
+        });
 
-        );
+        swiperInstances.set(element, swiperInstance);
     }
-
     catch (err) {
         console.error("[BlazzyCarousel] Initialization error:", err);
     }
 }
 
-export function destroyCarousel() {
-    if (swiperInstance) {
-        swiperInstance.destroy(true, true);
-        swiperInstance = null;
+export function destroyCarousel(element) {
+    if (swiperInstances.has(element)) {
+        const instance = swiperInstances.get(element);
+        instance.destroy(true, true);
+        swiperInstances.delete(element);
     }
+}
+
+export function getActiveIndex(element) {
+    if (swiperInstances.has(element)) {
+        return swiperInstances.get(element).activeIndex;
+    }
+    return 0;
 }

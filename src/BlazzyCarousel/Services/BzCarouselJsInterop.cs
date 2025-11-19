@@ -12,6 +12,7 @@ public class BzCarouselJsInterop : IAsyncDisposable
 {
     private readonly Lazy<Task<IJSObjectReference>> moduleTask;
     private bool swiperLoaded = false;
+    private ElementReference? _element;
 
     public BzCarouselJsInterop(IJSRuntime jsRuntime)
     {
@@ -26,6 +27,7 @@ public class BzCarouselJsInterop : IAsyncDisposable
     /// <param name="options">Carousel configuration options</param>
     public async ValueTask InitializeAsync(ElementReference element, BzCarouselOptions options)
     {
+        _element = element;
         var module = await moduleTask.Value;
 
         if (!swiperLoaded)
@@ -49,10 +51,10 @@ public class BzCarouselJsInterop : IAsyncDisposable
     /// <returns>Active slide index</returns>
     public async ValueTask<int> GetActiveIndexAsync()
     {
-        if (moduleTask.IsValueCreated)
+        if (moduleTask.IsValueCreated && _element.HasValue)
         {
             var module = await moduleTask.Value;
-            return await module.InvokeAsync<int>("getActiveIndex");
+            return await module.InvokeAsync<int>("getActiveIndex", _element.Value);
         }
         return 0;
     }
@@ -62,10 +64,10 @@ public class BzCarouselJsInterop : IAsyncDisposable
     /// </summary>
     public async ValueTask DestroyAsync()
     {
-        if (moduleTask.IsValueCreated)
+        if (moduleTask.IsValueCreated && _element.HasValue)
         {
             var module = await moduleTask.Value;
-            await module.InvokeVoidAsync("destroyCarousel");
+            await module.InvokeVoidAsync("destroyCarousel", _element.Value);
         }
     }
 

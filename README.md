@@ -529,19 +529,12 @@ Error BZC002: Property 'ImageData' with [BzImage] attribute must be of type 'str
 2. Verify image URLs are valid and accessible
 3. Inspect browser console for JavaScript errors
 
-### Multiple Carousels Conflict
-
-**Problem**: Multiple carousels on the same page interfere with each other.
-
-**Solution**: This is a known limitation in the current version. Use a unique key or separate pages as a workaround. Multi-instance support is planned for a future release.
-
 ## Roadmap
 
 Planned features for future releases:
 
 - **Navigation Controls**: Previous/Next buttons and pagination indicators
 - **Autoplay Mode**: Automatic slide progression with configurable intervals
-- **Multi-Instance Support**: Proper handling of multiple carousels on a single page
 - **Keyboard Navigation**: Arrow key support for accessibility
 - **ARIA Attributes**: Enhanced screen reader support
 - **Lazy Loading**: On-demand image loading for large datasets
