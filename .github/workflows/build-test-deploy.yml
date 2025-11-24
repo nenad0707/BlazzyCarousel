@@ -1,4 +1,4 @@
-name: Build & Deploy to GitHub Pages
+Name: Build & Deploy to GitHub Pages
 
 on:
   push:
@@ -25,18 +25,18 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore Dependencies
-        run: dotnet restore BlazzyCarousel.sln
+        run: dotnet restore BlazzyMotion.sln
 
       - name: Build Solution
-        run: dotnet build BlazzyCarousel.sln --configuration Release --no-restore
+        run: dotnet build BlazzyMotion.sln --configuration Release --no-restore
 
       - name: Publish Blazor WASM
-        run: dotnet publish src/BlazzyCarousel.Demo/BlazzyCarousel.Demo.csproj -c Release -o output
+        run: dotnet publish src/BlazzyMotion.Demo/BlazzyMotion.Demo.csproj -c Release -o output
 
       - name: Fix Base Href
         run: |
-          sed -i 's|<base href="/" />|<base href="/BlazzyCarousel/" />|g' output/wwwroot/index.html
-          echo "✅ Base href set to /BlazzyCarousel/"
+          sed -i 's|<base href="/" />|<base href="/BlazzyMotion.Carousel/" />|g' output/wwwroot/index.html
+          echo "✅ Base href set to /BlazzyMotion.Carousel/"
 
       - name: Add .nojekyll
         run: touch output/wwwroot/.nojekyll
@@ -52,4 +52,4 @@ jobs:
       - name: Deployment Complete
         run: |
           echo "🎉 Successfully deployed to GitHub Pages!"
-          echo "🌐 URL: https://nenad0707.github.io/BlazzyCarousel/"
+          echo "🌐 URL: https://blazzymotion.github.io/BlazzyMotion.Carousel/"

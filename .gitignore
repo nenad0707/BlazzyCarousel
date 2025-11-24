@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Custom ignores for this project
+*_output.txt
+TestResults/
+.vs/
+.vscode/settings.json
