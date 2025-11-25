@@ -1,4 +1,4 @@
-Name: Build & Deploy to GitHub Pages
+name: Build & Deploy to GitHub Pages
 
 on:
   push:
@@ -24,19 +24,23 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      # Pazite da se ovo ime slaze sa imenom vaseg .sln fajla
       - name: Restore Dependencies
         run: dotnet restore BlazzyMotion.sln
 
       - name: Build Solution
         run: dotnet build BlazzyMotion.sln --configuration Release --no-restore
 
+      # Pazite na putanju do Demo projekta
       - name: Publish Blazor WASM
         run: dotnet publish src/BlazzyMotion.Demo/BlazzyMotion.Demo.csproj -c Release -o output
 
+      # KLJUČNO: Ovde definišemo na kojoj adresi ce sajt raditi
+      # Ako se repo zove "BlazzyMotion", ovde mora biti /BlazzyMotion/
       - name: Fix Base Href
         run: |
-          sed -i 's|<base href="/" />|<base href="/BlazzyMotion.Carousel/" />|g' output/wwwroot/index.html
-          echo "✅ Base href set to /BlazzyMotion.Carousel/"
+          sed -i 's|<base href="/" />|<base href="/BlazzyMotion/" />|g' output/wwwroot/index.html
+          echo "✅ Base href set to /BlazzyMotion/"
 
       - name: Add .nojekyll
         run: touch output/wwwroot/.nojekyll
@@ -52,4 +56,4 @@ jobs:
       - name: Deployment Complete
         run: |
           echo "🎉 Successfully deployed to GitHub Pages!"
-          echo "🌐 URL: https://blazzymotion.github.io/BlazzyMotion.Carousel/"
+          echo "🌐 URL: https://blazzy-motion.github.io/BlazzyMotion/"
