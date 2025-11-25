@@ -9,3 +9,7 @@ global using BlazzyMotion.Carousel.Models;
 global using BlazzyMotion.Carousel.Attributes;
 global using BlazzyMotion.Carousel.Services;
 global using BlazzyMotion.Tests.Helpers;
+
+// Source Generator Testing
+global using Microsoft.CodeAnalysis;
+global using Microsoft.CodeAnalysis.CSharp;
