@@ -128,6 +128,7 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
     private BzCarouselJsInterop? jsInterop;
     private bool initialized = false;
     private bool needsReinit = false;
+    private bool _isReinitializing = false;
     private int? lastItemCount;
     private string? lastOptionsSnapshot;
     private int? lastKeyParamsHash;
@@ -240,8 +241,9 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
                 Console.Error.WriteLine($"[BzCarousel] Error: {ex.Message}");
             }
         }
-        else if (initialized && needsReinit)
+        else if (initialized && needsReinit && !_isReinitializing)
         {
+            _isReinitializing = true;
             try
             {
                 // Recreate Swiper when the data or critical options change.
@@ -253,6 +255,10 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"[BzCarousel] Re-init error: {ex.Message}");
+            }
+            finally
+            {
+                _isReinitializing = false;
             }
         }
     }
