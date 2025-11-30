@@ -3,7 +3,7 @@ namespace BlazzyMotion.Tests.Components;
 /// <summary>
 /// Advanced tests for BzCarousel component covering edge cases and parameter validation
 /// </summary>
-public class BzCarouselAdvancedTests : TestContext
+public class BzCarouselAdvancedTests : TestBase
 {
   #region Parameter Validation Tests
 
