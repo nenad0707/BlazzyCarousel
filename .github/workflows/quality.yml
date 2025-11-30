@@ -51,7 +51,7 @@ jobs:
         run: |
           dotnet sonarscanner begin \
             /k:"Blazzy-Motion_BlazzyMotion" \
-            /o:"Blazzy-Motion" \
+            /o:"blazzy-motion" \
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
