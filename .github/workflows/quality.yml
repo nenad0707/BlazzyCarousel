@@ -57,7 +57,8 @@ jobs:
             /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
             /d:sonar.coverage.exclusions="**Tests/**,**Demo/**,**/Services/BzCarouselJsInterop.cs" \
-            /d:sonar.exclusions="**/wwwroot/js/**"
+            /d:sonar.exclusions="**/wwwroot/js/**" \
+            /d:sonar.qualitygate.wait=false
 
       - name: Restore Dependencies
         run: dotnet restore ${{ env.SOLUTION_PATH }}
