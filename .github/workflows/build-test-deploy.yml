@@ -1,8 +1,12 @@
-name: Build & Deploy to GitHub Pages
+name: 🚀 Deploy Demo
 
 on:
   push:
     branches: [main]
+    paths:
+      - "src/BlazzyMotion.Demo/**"
+      - "src/BlazzyMotion.Carousel/**"
+      - "src/BlazzyMotion.SourceGen/**"
   workflow_dispatch:
 
 permissions:
@@ -10,50 +14,56 @@ permissions:
   pages: write
   id-token: write
 
-jobs:
-  build-and-deploy:
-    name: Build & Deploy
-    runs-on: ubuntu-latest
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
+env:
+  DOTNET_VERSION: "8.0.x"
+  DEMO_PROJECT: "src/BlazzyMotion.Demo/BlazzyMotion.Demo.csproj"
+  BASE_PATH: "/BlazzyMotion/"
+
+jobs:
+  deploy:
+    name: Build & Deploy Demo
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET 8
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # Pazite da se ovo ime slaze sa imenom vaseg .sln fajla
-      - name: Restore Dependencies
-        run: dotnet restore BlazzyMotion.sln
+      - name: Publish Demo
+        run: |
+          dotnet publish ${{ env.DEMO_PROJECT }} \
+            --configuration Release \
+            --output ./output
 
-      - name: Build Solution
-        run: dotnet build BlazzyMotion.sln --configuration Release --no-restore
-
-      # Pazite na putanju do Demo projekta
-      - name: Publish Blazor WASM
-        run: dotnet publish src/BlazzyMotion.Demo/BlazzyMotion.Demo.csproj -c Release -o output
-
-      # KLJUČNO: Ovde definišemo na kojoj adresi ce sajt raditi
-      # Ako se repo zove "BlazzyMotion", ovde mora biti /BlazzyMotion/
       - name: Fix Base Href
         run: |
-          sed -i 's|<base href="/" />|<base href="/BlazzyMotion/" />|g' output/wwwroot/index.html
-          echo "✅ Base href set to /BlazzyMotion/"
+          sed -i 's|<base href="/" />|<base href="${{ env.BASE_PATH }}" />|g' ./output/wwwroot/index.html
 
       - name: Add .nojekyll
-        run: touch output/wwwroot/.nojekyll
+        run: touch ./output/wwwroot/.nojekyll
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: output/wwwroot
+          path: ./output/wwwroot
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Deployment Complete
+      - name: Deployment Summary
         run: |
-          echo "🎉 Successfully deployed to GitHub Pages!"
-          echo "🌐 URL: https://blazzy-motion.github.io/BlazzyMotion/"
+          echo "### 🎉 Demo Successfully Deployed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Live URL:** https://blazzy-motion.github.io${{ env.BASE_PATH }}" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Artifact:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
