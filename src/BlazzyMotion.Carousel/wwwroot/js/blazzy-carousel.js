@@ -112,20 +112,34 @@ export async function initializeCarousel(element, optionsJson) {
         }
 
         const options = optionsJson ? JSON.parse(optionsJson) : {};
+        const wrapper = container.querySelector('.swiper-wrapper');
+        const originalSlides = wrapper.querySelectorAll('.swiper-slide');
+        const slideCount = originalSlides.length;
 
-        const swiperInstance = new Swiper(container, {
+        const minSlidesForLoop = 4;
+        const minSlidesForAutoLoop = 7;
+        const shouldLoop = options.loop === true && slideCount >= minSlidesForLoop;
+
+        if (shouldLoop && slideCount < minSlidesForAutoLoop) {
+            const slidesToAdd = minSlidesForAutoLoop - slideCount + 2;
+            for (let i = 0; i < slidesToAdd; i++) {
+                const clone = originalSlides[i % slideCount].cloneNode(true);
+                clone.setAttribute('data-bzc-clone', 'true');
+                wrapper.appendChild(clone);
+            }
+        }
+
+        const swiperConfig = {
             effect: options.effect || "coverflow",
             grabCursor: options.grabCursor ?? true,
             centeredSlides: options.centeredSlides ?? true,
             slidesPerView: options.slidesPerView || "auto",
             initialSlide: options.initialSlide || 0,
-            loop: options.loop ?? true,
-            loopAdditionalSlides: 2,
+            loop: shouldLoop,
             speed: 0,
             runCallbacksOnInit: false,
             slideToClickedSlide: true,
             watchSlidesProgress: true,
-            watchSlidesVisibility: true,
             observer: true,
             observeParents: true,
             touchRatio: 1,
@@ -154,13 +168,22 @@ export async function initializeCarousel(element, optionsJson) {
                         this.params.runCallbacksOnInit = true;
 
                         setTimeout(() => {
-                            this.el.classList.remove('bzc-hidden');
-                            this.el.classList.add('bzc-visible');
+                            if (this.el) {
+                                this.el.classList.remove('bzc-hidden');
+                                this.el.classList.add('bzc-visible');
+                            }
                         }, 100);
                     }
                 }
             }
-        });
+        };
+
+        if (shouldLoop) {
+            swiperConfig.loopedSlides = slideCount;
+            swiperConfig.loopAdditionalSlides = 2;
+        }
+
+        const swiperInstance = new Swiper(container, swiperConfig);
 
         swiperInstances.set(element, swiperInstance);
     }
