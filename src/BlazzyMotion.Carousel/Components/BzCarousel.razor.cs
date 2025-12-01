@@ -79,6 +79,7 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
 
     /// <summary>
     /// Minimum number of items required to enable loop mode.
+    /// With coverflow effect, at least 4 slides are needed for loop.
     /// </summary>
     [Parameter]
     public int MinItemsForLoop { get; set; } = 4;
