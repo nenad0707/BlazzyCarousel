@@ -34,14 +34,11 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore
 
-      - name: Build SourceGen (Release)
-        run: dotnet build ${{ env.SOURCEGEN_PATH }} --configuration Release --no-restore
-
-      - name: Build Carousel (Release)
-        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+      - name: Build Solution (Release)
+        run: dotnet build --configuration Release --no-restore
 
       - name: Run Tests
-        run: dotnet test --configuration Release --no-build
+        run: dotnet test --configuration Release --no-build --verbosity normal
 
       - name: Pack BlazzyMotion.Carousel
         run: |
