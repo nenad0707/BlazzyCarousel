@@ -137,8 +137,9 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
     /// <summary>
     /// Static cache for generated templates (shared across all instances).
     /// Thread-safe via ConcurrentDictionary.
+    /// Stores as Delegate to avoid generic type casting issues.
     /// </summary>
-    private static readonly ConcurrentDictionary<Type, RenderFragment<object>?>
+    private static readonly ConcurrentDictionary<Type, Delegate?>
         _generatedTemplateCache = new();
 
     /// <summary>
@@ -381,7 +382,8 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
             Console.WriteLine($"[BzCarousel] Source Generator template not found for {itemType.Name}: {ex.Message}");
         }
 
-        _generatedTemplateCache.TryAdd(itemType, result as RenderFragment<object>);
+        // Store as Delegate to preserve the actual type
+        _generatedTemplateCache.TryAdd(itemType, result);
 
         return result;
     }
