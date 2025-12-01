@@ -4,13 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Package Version (e.g., 1.0.0)"
+        description: "Package Version (e.g., 1.0.0-preview1)"
         required: true
-        default: "1.0.0"
-      release_notes:
-        description: "Release Notes"
-        required: false
-        default: "Minor improvements and bug fixes"
+        default: "1.0.0-preview1"
 
 env:
   DOTNET_VERSION: "8.0.x"
@@ -46,8 +42,7 @@ jobs:
             --configuration Release \
             --no-build \
             --output ./nupkgs \
-            /p:PackageVersion=${{ github.event.inputs.version }} \
-            /p:PackageReleaseNotes="${{ github.event.inputs.release_notes }}"
+            /p:PackageVersion=${{ github.event.inputs.version }}
 
       - name: List Packages
         run: ls -lah ./nupkgs
@@ -72,7 +67,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📦 **Version:** ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **NuGet:** https://www.nuget.org/packages/BlazzyMotion.Carousel/${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "📝 **Release Notes:** ${{ github.event.inputs.release_notes }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📥 Installation" >> $GITHUB_STEP_SUMMARY
           echo '```bash' >> $GITHUB_STEP_SUMMARY
