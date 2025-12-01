@@ -81,7 +81,7 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
     /// Minimum number of items required to enable loop mode.
     /// </summary>
     [Parameter]
-    public int MinItemsForLoop { get; set; } = 3;
+    public int MinItemsForLoop { get; set; } = 6;
 
     /// <summary>
     /// Rotation angle for coverflow effect (degrees).

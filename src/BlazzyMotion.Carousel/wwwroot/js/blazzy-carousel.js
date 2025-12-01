@@ -154,8 +154,10 @@ export async function initializeCarousel(element, optionsJson) {
                         this.params.runCallbacksOnInit = true;
 
                         setTimeout(() => {
-                            this.el.classList.remove('bzc-hidden');
-                            this.el.classList.add('bzc-visible');
+                            if (this.el) {
+                                this.el.classList.remove('bzc-hidden');
+                                this.el.classList.add('bzc-visible');
+                            }
                         }, 100);
                     }
                 }
