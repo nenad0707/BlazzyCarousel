@@ -48,7 +48,7 @@ A modern, high-performance 3D carousel component for Blazor with zero-configurat
 
 Experience BlazzyMotion.Carousel in action: **[View Live Demo](https://blazzy-motion.github.io/BlazzyMotion/)**
 
-![BlazzyMotion.Carousel Demo](docs/images/demo.gif)
+![BlazzyMotion.Carousel Demo](https://raw.githubusercontent.com/Blazzy-Motion/BlazzyMotion/main/docs/images/demo.gif)
 
 ## Quick Start
 
@@ -170,7 +170,7 @@ The component uses the following priority when selecting a template:
 | ---------------------- | ------ | ------- | ------------------------------------------------------------- |
 | `Loop`                 | `bool` | `true`  | Enable infinite loop navigation                               |
 | `InitialSlide`         | `int`  | `0`     | Index of the initially active slide                           |
-| `MinItemsForLoop`      | `int`  | `3`     | Minimum items required to enable loop mode                    |
+| `MinItemsForLoop`      | `int`  | `4`     | Minimum items required to enable loop mode                    |
 | `AutoDetectMode`       | `bool` | `true`  | Automatically switch between coverflow and simple modes       |
 | `MinItemsForCoverflow` | `int`  | `4`     | Minimum items for coverflow effect (below uses simple slider) |
 
