@@ -3,7 +3,7 @@ namespace BlazzyMotion.Tests.Components;
 /// <summary>
 /// Basic tests for BzCarousel component covering essential functionality
 /// </summary>
-public class BzCarouselBasicTests : TestContext
+public class BzCarouselBasicTests : TestBase
 {
     [Fact]
     public void BzCarousel_WithNullItems_ShouldShowLoadingState()

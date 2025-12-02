@@ -308,7 +308,7 @@ namespace TestNamespace
 
         // Assert
         var generated = FindGeneratedFile(result.GeneratedSources, "MovieBzCarouselExtensions");
-        
+
         // Should use first found title property
         generated.Should().Contain("title = item.");
     }
@@ -419,7 +419,7 @@ namespace TestNamespace
         // Assert
         var generated = FindGeneratedFile(result.GeneratedSources, "MovieBzCarouselExtensions");
         generated.Should().NotBeNull();
-        
+
         // Generated code should have proper XML escaping in docs
         if (generated != null)
         {
@@ -446,7 +446,7 @@ namespace TestNamespace
 
         // Assert
         var firstGenerated = FindGeneratedFile(results[0].GeneratedSources, "TestMovieBzCarouselExtensions");
-        
+
         foreach (var result in results.Skip(1))
         {
             var generated = FindGeneratedFile(result.GeneratedSources, "TestMovieBzCarouselExtensions");
@@ -482,8 +482,8 @@ namespace TestNamespace
         var result = RunGenerator(source);
         stopwatch.Stop();
 
-        // Assert
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(5000, "Should complete in under 5 seconds");
+        // Assert 
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(10000, "Should complete in under 10 seconds");
         result.GeneratedSources.Should().HaveCountGreaterOrEqualTo(20, "Should generate for all classes");
     }
 

@@ -1,0 +1,84 @@
+name: 📦 Publish NuGet
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Package Version (e.g., 1.0.0-preview1)"
+        required: true
+        default: "1.0.0-preview1"
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  PROJECT_PATH: "src/BlazzyMotion.Carousel/BlazzyMotion.Carousel.csproj"
+  SOURCEGEN_PATH: "src/BlazzyMotion.SourceGen/BlazzyMotion.SourceGen.csproj"
+
+jobs:
+  publish:
+    name: Pack & Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Solution (Release)
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Pack BlazzyMotion.Carousel
+        run: |
+          dotnet pack ${{ env.PROJECT_PATH }} \
+            --configuration Release \
+            --no-build \
+            --output ./nupkgs \
+            /p:PackageVersion=${{ github.event.inputs.version }}
+
+      - name: List Packages
+        run: ls -lah ./nupkgs
+
+      - name: Push to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push ./nupkgs/*.nupkg \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
+          git push origin "v${{ github.event.inputs.version }}"
+
+      - name: Publication Summary
+        run: |
+          echo "### 🎉 NuGet Package Published!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Version:** ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **NuGet:** https://www.nuget.org/packages/BlazzyMotion.Carousel/${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 Installation" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "dotnet add package BlazzyMotion.Carousel --version ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Package Contents" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ BlazzyMotion.Carousel component" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Source Generator (bundled)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ CSS and JS assets" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ BzImage, BzTitle, BzDescription attributes" >> $GITHUB_STEP_SUMMARY

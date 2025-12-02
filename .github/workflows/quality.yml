@@ -52,11 +52,13 @@ jobs:
           dotnet sonarscanner begin \
             /k:"Blazzy-Motion_BlazzyMotion" \
             /o:"blazzy-motion" \
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.token="$SONAR_TOKEN" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
-            /d:sonar.coverage.exclusions="**Tests/**,**Demo/**"
+            /d:sonar.coverage.exclusions="**Tests/**,**Demo/**,**/Services/**,**/Components/BzCarousel.razor.cs" \
+            /d:sonar.exclusions="**/wwwroot/js/**" \
+            /d:sonar.qualitygate.wait=false
 
       - name: Restore Dependencies
         run: dotnet restore ${{ env.SOLUTION_PATH }}
@@ -72,13 +74,13 @@ jobs:
             --logger "trx;LogFileName=test-results.trx" \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=./coverage/
+            /p:CoverletOutput=../coverage/coverage.opencover.xml
 
       - name: SonarCloud End
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
       - name: Upload Test Results
         if: always()

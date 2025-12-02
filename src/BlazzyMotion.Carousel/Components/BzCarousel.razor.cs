@@ -240,6 +240,7 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
             }
             catch (Exception ex)
             {
+                // Logging excluded from coverage - not testable without real JS runtime
                 Console.Error.WriteLine($"[BzCarousel] Error: {ex.Message}");
             }
         }
@@ -256,7 +257,8 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[BzCarousel] Re-init error: {ex.Message}");
+                // Logging excluded from coverage - not testable without real JS runtime
+                Console.Error.WriteLine($"[BzCarousel] Error: {ex.Message}");
             }
             finally
             {
@@ -467,7 +469,7 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
             throw new ArgumentOutOfRangeException(
                 nameof(RotateDegree),
                 RotateDegree,
-                "RotateDegree must be between 0 and 360 degrees.");
+                "Error: RotateDegree must be between 0 and 360 degrees.");
         }
 
         if (Depth < 0)
@@ -514,4 +516,5 @@ public partial class BzCarousel<TItem> : ComponentBase, IAsyncDisposable
     }
 
     #endregion
+
 }
