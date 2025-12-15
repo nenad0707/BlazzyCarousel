@@ -1,0 +1,22 @@
+﻿<Project>
+  <PropertyGroup>
+    <BlazzyCoreVersion Condition="'$(BlazzyCoreVersion)' == ''">1.0.0</BlazzyCoreVersion>
+    <BlazzyCarouselVersion Condition="'$(BlazzyCarouselVersion)' == ''">1.1.0</BlazzyCarouselVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Nenad Ristić</Authors>
+    <Company>BlazzyMotion</Company>
+    <Copyright>Copyright © 2025 BlazzyMotion</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://blazzy-motion.github.io/BlazzyMotion/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Blazzy-Motion/BlazzyMotion</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

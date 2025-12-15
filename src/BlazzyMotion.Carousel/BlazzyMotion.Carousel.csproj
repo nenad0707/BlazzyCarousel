@@ -2,22 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-
-    <!-- NuGet Package Metadata -->
+    <Version>$(BlazzyCarouselVersion)</Version>
+    <PackageVersion>$(BlazzyCarouselVersion)</PackageVersion>
     <PackageId>BlazzyMotion.Carousel</PackageId>
     <Title>BlazzyMotion 3D Carousel</Title>
-    <Version>1.1.0</Version>
-    <Authors>Nenad Ristić</Authors>
-    <Company>BlazzyMotion</Company>
     <Description>A beautiful 3D carousel component for Blazor with Glassmorphism design and Coverflow effect. Features zero-config setup with [BzImage] attribute and automatic template generation via Source Generator. Live demo: https://blazzy-motion.github.io/BlazzyMotion/</Description>
-    <Copyright>Copyright © 2025 BlazzyMotion</Copyright>
-    <PackageProjectUrl>https://blazzy-motion.github.io/BlazzyMotion/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Blazzy-Motion/BlazzyMotion</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>blazor;carousel;3d;swiper;coverflow;ui;component;glassmorphism;source-generator</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
@@ -35,14 +25,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlazzyMotion.Core\BlazzyMotion.Core.csproj" />
-    <ProjectReference Include="..\BlazzyMotion.SourceGen\BlazzyMotion.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\BlazzyMotion.SourceGen\BlazzyMotion.SourceGen.csproj" 
+                      OutputItemType="Analyzer" 
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 
   <ItemGroup>
-    <None Include="..\BlazzyMotion.SourceGen\bin\$(Configuration)\netstandard2.0\BlazzyMotion.SourceGen.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="..\BlazzyMotion.SourceGen\bin\$(Configuration)\netstandard2.0\BlazzyMotion.SourceGen.dll" 
+          Pack="true" 
+          PackagePath="analyzers/dotnet/cs" 
+          Visible="false" />
   </ItemGroup>
-
 
   <ItemGroup>
     <None Include="icon.png" Pack="true" PackagePath="\" Condition="Exists('icon.png')" />

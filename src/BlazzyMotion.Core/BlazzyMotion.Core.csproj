@@ -2,26 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-
-    <!-- NuGet Package Metadata -->
+    <Version>$(BlazzyCoreVersion)</Version>
+    <PackageVersion>$(BlazzyCoreVersion)</PackageVersion>
     <PackageId>BlazzyMotion.Core</PackageId>
     <Title>BlazzyMotion Core</Title>
-    <Version>1.0.0</Version>
-    <Authors>Nenad Ristić</Authors>
-    <Company>BlazzyMotion</Company>
     <Description>Core infrastructure for BlazzyMotion UI components. Contains shared abstractions, services, and theming system used by all BlazzyMotion components (Carousel, Gallery, Masonry, etc.).</Description>
-    <Copyright>Copyright © 2025 BlazzyMotion</Copyright>
-    <PackageProjectUrl>https://blazzy-motion.github.io/BlazzyMotion/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Blazzy-Motion/BlazzyMotion</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>blazor;ui;components;core;infrastructure;theming</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
-    <!-- Source Generator Support -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
@@ -30,12 +19,11 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
-  <!-- Blazor Dependencies -->
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
   </ItemGroup>
 
-  <!-- Package Assets -->
+
   <ItemGroup>
     <None Include="icon.png" Pack="true" PackagePath="\" Condition="Exists('icon.png')" />
     <None Include="README.md" Pack="true" PackagePath="\" />

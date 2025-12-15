@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       core_version:
-        description: "Core Package Version (e.g., 1.0.0-preview1)"
+        description: "Core Package Version (e.g., 1.0.0)"
         required: true
-        default: "1.0.0-preview1"
+        default: "1.0.0"
         type: string
       carousel_version:
-        description: "Carousel Package Version (e.g., 1.1.0-preview1)"
+        description: "Carousel Package Version (e.g., 1.1.0)"
         required: true
-        default: "1.1.0-preview1"
+        default: "1.1.0"
         type: string
       publish_core:
         description: "Publish Core package?"
@@ -55,7 +55,10 @@ jobs:
         run: dotnet restore
 
       - name: Build Solution (Release)
-        run: dotnet build --configuration Release --no-restore
+        run: |
+          dotnet build --configuration Release --no-restore \
+            /p:BlazzyCoreVersion="$CORE_VERSION" \
+            /p:BlazzyCarouselVersion="$CAROUSEL_VERSION"
 
       - name: Run Tests
         run: dotnet test --configuration Release --no-build --verbosity normal
@@ -67,7 +70,7 @@ jobs:
             --configuration Release \
             --no-build \
             --output ./nupkgs \
-            /p:PackageVersion="$CORE_VERSION"
+            /p:BlazzyCoreVersion="$CORE_VERSION"
 
       - name: Pack BlazzyMotion.Carousel
         if: ${{ inputs.publish_carousel }}
@@ -76,10 +79,19 @@ jobs:
             --configuration Release \
             --no-build \
             --output ./nupkgs \
-            /p:PackageVersion="$CAROUSEL_VERSION"
+            /p:BlazzyCarouselVersion="$CAROUSEL_VERSION" \
+            /p:BlazzyCoreVersion="$CORE_VERSION"
 
       - name: List Packages
         run: ls -lah ./nupkgs
+
+      - name: Verify Package Dependencies
+        if: ${{ inputs.publish_carousel }}
+        run: |
+          echo "=== Verifying Carousel package dependencies ==="
+          unzip -p ./nupkgs/BlazzyMotion.Carousel.*.nupkg "*.nuspec" | grep -A5 "<dependencies>"
+          echo ""
+          echo "Expected Core dependency version: $CORE_VERSION"
 
       - name: Push to NuGet.org
         env:
@@ -99,15 +111,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           if [ "$PUBLISH_CORE" = "true" ]; then
-            git tag -a "core-v$CORE_VERSION" -m "Release BlazzyMotion.Core v$CORE_VERSION"
-            git push origin "core-v$CORE_VERSION"
-            echo "Created tag: core-v$CORE_VERSION"
+            git tag -a "core-v$CORE_VERSION" -m "Release BlazzyMotion.Core v$CORE_VERSION" || true
+            git push origin "core-v$CORE_VERSION" || echo "Tag already exists"
           fi
 
           if [ "$PUBLISH_CAROUSEL" = "true" ]; then
-            git tag -a "carousel-v$CAROUSEL_VERSION" -m "Release BlazzyMotion.Carousel v$CAROUSEL_VERSION"
-            git push origin "carousel-v$CAROUSEL_VERSION"
-            echo "Created tag: carousel-v$CAROUSEL_VERSION"
+            git tag -a "carousel-v$CAROUSEL_VERSION" -m "Release BlazzyMotion.Carousel v$CAROUSEL_VERSION" || true
+            git push origin "carousel-v$CAROUSEL_VERSION" || echo "Tag already exists"
           fi
 
       - name: Publication Summary
@@ -126,6 +136,7 @@ jobs:
           if [ "$PUBLISH_CAROUSEL" = "true" ]; then
             echo "#### BlazzyMotion.Carousel" >> $GITHUB_STEP_SUMMARY
             echo "- **Version:** $CAROUSEL_VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "- **Depends on:** BlazzyMotion.Core >= $CORE_VERSION" >> $GITHUB_STEP_SUMMARY
             echo "- **NuGet:** https://www.nuget.org/packages/BlazzyMotion.Carousel/$CAROUSEL_VERSION" >> $GITHUB_STEP_SUMMARY
             echo "- **Tag:** \`carousel-v$CAROUSEL_VERSION\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -143,23 +154,3 @@ jobs:
             echo "dotnet add package BlazzyMotion.Core --version $CORE_VERSION" >> $GITHUB_STEP_SUMMARY
           fi
           echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "### 📦 Package Contents" >> $GITHUB_STEP_SUMMARY
-          if [ "$PUBLISH_CORE" = "true" ]; then
-            echo "**BlazzyMotion.Core:**" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ BzComponentBase (abstract base class)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ BzImage, BzTitle, BzDescription attributes" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ BzRegistry (type mapping service)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ BzTheme enum (Glass, Dark, Light, Minimal)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ BzTemplateFactory" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ "$PUBLISH_CAROUSEL" = "true" ]; then
-            echo "**BlazzyMotion.Carousel:**" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ BzCarousel<T> component" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Source Generator (bundled)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ CSS and JS assets (Swiper.js)" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ 3D Coverflow effect" >> $GITHUB_STEP_SUMMARY
-            echo "- ✅ Glassmorphism themes" >> $GITHUB_STEP_SUMMARY
-          fi
