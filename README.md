@@ -93,6 +93,9 @@ If you see compiler errors after upgrading, simply update your `_Imports.razor`:
     - [Dark Theme](#dark-theme)
     - [Light Theme](#light-theme)
     - [Minimal Theme](#minimal-theme)
+  - [Mobile Optimization](#mobile-optimization)
+    - [Customizing Touch Behavior](#customizing-touch-behavior)
+    - [Touch Options Reference](#touch-options-reference)
   - [Advanced Usage](#advanced-usage)
     - [Custom Item Template](#custom-item-template)
     - [Handling Item Selection](#handling-item-selection)
@@ -346,6 +349,48 @@ No background container, pure carousel:
 ```razor
 <BzCarousel Items="items" Theme="BzTheme.Minimal" />
 ```
+
+## Mobile Optimization
+
+BlazzyMotion.Carousel includes mobile-optimized touch settings out of the box:
+
+```csharp
+// These are the defaults - no configuration needed!
+var options = new BzCarouselOptions
+{
+    TouchRatio = 1.0,        // Normal touch sensitivity
+    Threshold = 10,          // Minimum 10px movement to trigger swipe
+    ShortSwipes = false,     // Disabled to prevent glitchy behavior
+    ResistanceRatio = 0.85,  // Light resistance at edges
+    LongSwipesRatio = 0.3    // 30% slide width to advance
+};
+```
+
+### Customizing Touch Behavior
+
+```razor
+<BzCarousel Items="products" Options="@touchOptions" />
+
+@code {
+    private BzCarouselOptions touchOptions = new()
+    {
+        Threshold = 15,        // Require more deliberate swipe
+        ShortSwipes = true,    // Enable quick flicks if desired
+    };
+}
+```
+
+### Touch Options Reference
+
+| Option            | Default | Range     | Description                     |
+| ----------------- | ------- | --------- | ------------------------------- |
+| `TouchRatio`      | `1.0`   | 0.1 - 2.0 | Touch sensitivity multiplier    |
+| `Threshold`       | `10`    | 0 - 50    | Minimum pixels to trigger swipe |
+| `ShortSwipes`     | `false` | bool      | Allow quick flick gestures      |
+| `ResistanceRatio` | `0.85`  | 0 - 1     | Edge bounce resistance          |
+| `LongSwipesRatio` | `0.3`   | 0.1 - 0.9 | Slide width % to advance        |
+
+> 💡 **Tip:** If you experience glitchy behavior on mobile, try increasing `Threshold` to 15-20.
 
 ## Advanced Usage
 
