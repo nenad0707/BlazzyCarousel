@@ -88,11 +88,11 @@ export async function ensureSwiperLoaded() {
 
 
 const DEFAULT_TOUCH_SETTINGS = {
-    touchRatio: 0.8,
+    touchRatio: 1.0,
     threshold: 10,
     shortSwipes: false,
     resistanceRatio: 0.85,
-    longSwipesRatio: 0.5
+    longSwipesRatio: 0.3
 };
 
 

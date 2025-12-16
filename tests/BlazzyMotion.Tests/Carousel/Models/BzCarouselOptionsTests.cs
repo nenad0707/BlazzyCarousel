@@ -31,11 +31,11 @@ public class BzCarouselOptionsTests
         options.SlideShadows.Should().BeTrue();
 
         // Assert - Touch Options
-        options.TouchRatio.Should().Be(0.8);
+        options.TouchRatio.Should().Be(1.0);
         options.Threshold.Should().Be(10);
         options.ShortSwipes.Should().BeFalse();
         options.ResistanceRatio.Should().Be(0.85);
-        options.LongSwipesRatio.Should().Be(0.5);
+        options.LongSwipesRatio.Should().Be(0.3);
     }
 
     #endregion
@@ -280,13 +280,13 @@ public class BzCarouselOptionsTests
     }
 
     [Fact]
-    public void TouchRatio_DefaultValue_ShouldBe0Point8()
+    public void TouchRatio_DefaultValue_ShouldBe1Point0()
     {
         // Arrange & Act
         var options = new BzCarouselOptions();
 
         // Assert
-        options.TouchRatio.Should().Be(0.8);
+        options.TouchRatio.Should().Be(1.0);
     }
 
     [Theory]
@@ -384,13 +384,13 @@ public class BzCarouselOptionsTests
     }
 
     [Fact]
-    public void LongSwipesRatio_DefaultValue_ShouldBe0Point5()
+    public void LongSwipesRatio_DefaultValue_ShouldBe0Point3()
     {
         // Arrange & Act
         var options = new BzCarouselOptions();
 
         // Assert
-        options.LongSwipesRatio.Should().Be(0.5);
+        options.LongSwipesRatio.Should().Be(0.3);
     }
 
     #endregion
@@ -463,10 +463,10 @@ public class BzCarouselOptionsTests
         // Arrange & Act
         var options = new BzCarouselOptions();
 
-        // Assert - These defaults should provide smooth mobile experience
-        options.TouchRatio.Should().BeLessThan(1.0, "TouchRatio should be reduced for mobile");
+        // Assert - Key anti-glitch settings
         options.Threshold.Should().BeGreaterThan(5, "Threshold should be increased to prevent accidental swipes");
         options.ShortSwipes.Should().BeFalse("ShortSwipes should be disabled to prevent glitches");
+        options.LongSwipesRatio.Should().BeLessOrEqualTo(0.5, "LongSwipesRatio should allow easier slide transitions");
     }
 
     #endregion

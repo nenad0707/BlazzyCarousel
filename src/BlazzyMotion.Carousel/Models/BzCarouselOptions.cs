@@ -102,10 +102,9 @@ public class BzCarouselOptions
     /// Touch sensitivity multiplier (0.1 - 2.0).
     /// </summary>
     /// <remarks>
-    /// Lower values = less sensitive, reduces accidental swipes.
-    /// Default: 0.8 (slightly reduced for smoother mobile experience)
+    /// Default: 1.0 (normal sensitivity)
     /// </remarks>
-    public double TouchRatio { get; set; } = 0.8;
+    public double TouchRatio { get; set; } = 1.0;
 
     /// <summary>
     /// Minimum pixels to trigger swipe.
@@ -139,9 +138,9 @@ public class BzCarouselOptions
     /// </summary>
     /// <remarks>
     /// How far you must swipe to move to next slide.
-    /// Default: 0.5 (50% of slide width)
+    /// Default: 0.3 (30% of slide width)
     /// </remarks>
-    public double LongSwipesRatio { get; set; } = 0.5;
+    public double LongSwipesRatio { get; set; } = 0.3;
 
     #endregion
 }
