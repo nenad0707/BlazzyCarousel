@@ -68,7 +68,7 @@
         @if (selectedMovie != null)
         {
             <div class="selected-item">
-                <p>You selected: <strong>@selectedMovie.Title</strong></p>
+                <p>Currently viewing: <strong>@selectedMovie.Title</strong></p>
             </div>
         }
 
@@ -122,7 +122,7 @@
                 </div>
                 <div class="code-hint">
                     <i class="bi bi-info-circle"></i>
-                    <span>Click carousel items to see selection in action!</span>
+                    <span>Swipe through the carousel to see live selection!</span>
                 </div>
             </div>
 
@@ -140,16 +140,16 @@
     private Movie? selectedMovie;
 
     private List<Movie> movies = new()
-    {
-        new() { Title = "Despicable Me 4", ImageUrl = "images/despicableme.jpg" },
-        new() { Title = "Joker", ImageUrl = "images/joker.jpg" },
-        new() { Title = "The Platform 2", ImageUrl = "images/the-platform.jpg" },
-        new() { Title = "The Substance", ImageUrl = "images/thesubstance.jpg" },
-        new() { Title = "Venom", ImageUrl = "images/venom.jpg" },
-        new() { Title = "Survive", ImageUrl = "images/survive.jpg" },
-        new() { Title = "The Wild Robot", ImageUrl = "images/wild-robot.jpg" },
-        new() { Title = "Deadpool & Wolverine", ImageUrl = "images/wolwerine.jpg" }
-    };
+{
+new() { Title = "Despicable Me 4", ImageUrl = "images/despicableme.jpg" },
+new() { Title = "Joker", ImageUrl = "images/joker.jpg" },
+new() { Title = "The Platform 2", ImageUrl = "images/the-platform.jpg" },
+new() { Title = "The Substance", ImageUrl = "images/thesubstance.jpg" },
+new() { Title = "Venom", ImageUrl = "images/venom.jpg" },
+new() { Title = "Survive", ImageUrl = "images/survive.jpg" },
+new() { Title = "The Wild Robot", ImageUrl = "images/wild-robot.jpg" },
+new() { Title = "Deadpool & Wolverine", ImageUrl = "images/wolwerine.jpg" }
+};
 
     private string heroBackgroundStyle => currentTheme switch
     {

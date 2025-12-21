@@ -1,6 +1,6 @@
 using Bunit.JSInterop;
 
-namespace BlazzyMotion.Tests.Helpers;
+namespace BlazzyMotion.Tests;
 
 /// <summary>
 /// Base class for all component tests that use bUnit TestContext.
@@ -8,7 +8,7 @@ namespace BlazzyMotion.Tests.Helpers;
 /// </summary>
 public abstract class TestBase : TestContext
 {
-  protected BunitJSModuleInterop CarouselModule { get; }
+  protected BunitJSModuleInterop CoreModule { get; }
 
   protected TestBase()
   {
@@ -16,14 +16,19 @@ public abstract class TestBase : TestContext
     JSInterop.Mode = JSRuntimeMode.Loose;
 
     // Setup the module that BzCarouselJsInterop imports
-    // BzCarouselJsInterop uses: jsRuntime.InvokeAsync<IJSObjectReference>("import", path)
-    CarouselModule = JSInterop.SetupModule(
-      "./_content/BlazzyMotion.Core/js/blazzy-core.js");
+    // Now points to Core module (v1.1.0+)
+    CoreModule = JSInterop.SetupModule(
+        "./_content/BlazzyMotion.Core/js/blazzy-core.js");
 
     // Setup all methods the module exposes
-    CarouselModule.SetupVoid("initializeCarousel", _ => true);
-    CarouselModule.SetupVoid("destroyCarousel", _ => true);
-    CarouselModule.SetupVoid("ensureSwiperLoaded", _ => true);
-    CarouselModule.Setup<int>("getActiveIndex", _ => true).SetResult(0);
+    // Updated signature for v1.2.0 - initializeCarousel now accepts dotNetRef
+    CoreModule.SetupVoid("initializeCarousel", _ => true);
+    CoreModule.SetupVoid("destroyCarousel", _ => true);
+    CoreModule.SetupVoid("ensureSwiperLoaded", _ => true);
+    CoreModule.Setup<int>("getActiveIndex", _ => true).SetResult(0);
+    CoreModule.Setup<int>("getRealIndex", _ => true).SetResult(0);
   }
+
+  // Legacy property for backward compatibility with existing tests
+  protected BunitJSModuleInterop CarouselModule => CoreModule;
 }

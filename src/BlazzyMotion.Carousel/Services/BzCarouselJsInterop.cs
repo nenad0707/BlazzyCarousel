@@ -20,6 +20,7 @@ namespace BlazzyMotion.Carousel.Services;
 /// <item>Lazy module loading (loaded on first use)</item>
 /// <item>Automatic Swiper library loading</item>
 /// <item>Instance management per element</item>
+/// <item>Slide change callbacks to Blazor</item>
 /// <item>Proper disposal and cleanup</item>
 /// </list>
 /// </para>
@@ -27,9 +28,7 @@ namespace BlazzyMotion.Carousel.Services;
 [ExcludeFromCodeCoverage]
 public class BzCarouselJsInterop : IAsyncDisposable
 {
-    // ═══════════════════════════════════════════════════════════════════
     // PRIVATE FIELDS
-    // ═══════════════════════════════════════════════════════════════════
 
     /// <summary>
     /// Lazy-loaded JavaScript module reference.
@@ -63,24 +62,29 @@ public class BzCarouselJsInterop : IAsyncDisposable
             "import", "./_content/BlazzyMotion.Core/js/blazzy-core.js").AsTask());
     }
 
-   // PUBLIC METHODS
+    // PUBLIC METHODS
 
     /// <summary>
     /// Initializes the carousel with the specified options.
     /// </summary>
     /// <param name="element">The carousel's root element reference</param>
     /// <param name="options">Carousel configuration options</param>
+    /// <param name="dotNetRef">Reference to the Blazor component for callbacks</param>
     /// <remarks>
     /// <para>
     /// This method:
     /// <list type="number">
     /// <item>Loads Swiper CSS and JS (if not already loaded)</item>
     /// <item>Creates a Swiper instance with coverflow effect</item>
+    /// <item>Registers slide change callback to Blazor</item>
     /// <item>Stores the instance for later control</item>
     /// </list>
     /// </para>
     /// </remarks>
-    public async ValueTask InitializeAsync(ElementReference element, BzCarouselOptions options)
+    public async ValueTask InitializeAsync<TItem>(
+        ElementReference element,
+        BzCarouselOptions options,
+        DotNetObjectReference<TItem>? dotNetRef = null) where TItem : class
     {
         _element = element;
         var module = await _moduleTask.Value;
@@ -98,8 +102,15 @@ public class BzCarouselJsInterop : IAsyncDisposable
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
 
-        // Initialize carousel
-        await module.InvokeVoidAsync("initializeCarousel", element, optionsJson);
+        // Initialize carousel with optional .NET callback reference
+        if (dotNetRef != null)
+        {
+            await module.InvokeVoidAsync("initializeCarousel", element, optionsJson, dotNetRef);
+        }
+        else
+        {
+            await module.InvokeVoidAsync("initializeCarousel", element, optionsJson, null);
+        }
     }
 
     /// <summary>

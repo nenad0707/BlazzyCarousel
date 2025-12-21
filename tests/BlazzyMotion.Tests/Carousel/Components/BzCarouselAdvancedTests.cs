@@ -1,4 +1,4 @@
-namespace BlazzyMotion.Tests.Carousel.Components;
+﻿namespace BlazzyMotion.Tests.Carousel.Components;
 
 /// <summary>
 /// Advanced tests for BzCarousel component covering edge cases and parameter validation
@@ -25,7 +25,7 @@ public class BzCarouselAdvancedTests : TestBase
             .Add(p => p.RotateDegree, invalidDegree));
 
         act.Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage("*Must be between 0 and 360*");
+            .WithParameterName("RotateDegree");
     }
 
     [Theory]
@@ -45,7 +45,7 @@ public class BzCarouselAdvancedTests : TestBase
             .Add(p => p.Depth, invalidDepth));
 
         act.Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage("*Must be non-negative*");
+            .WithParameterName("Depth");
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class BzCarouselAdvancedTests : TestBase
             .Add(p => p.MinItemsForLoop, invalidValue));
 
         act.Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage("*Must be at least 1*");
+            .WithParameterName("MinItemsForLoop");
     }
 
     [Theory]
@@ -85,7 +85,7 @@ public class BzCarouselAdvancedTests : TestBase
             .Add(p => p.MinItemsForCoverflow, invalidValue));
 
         act.Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage("*Must be at least 1*");
+            .WithParameterName("MinItemsForCoverflow");
     }
 
     [Theory]
@@ -105,7 +105,7 @@ public class BzCarouselAdvancedTests : TestBase
             .Add(p => p.InitialSlide, invalidSlide));
 
         act.Should().Throw<ArgumentOutOfRangeException>()
-            .WithMessage("*Must be non-negative*");
+            .WithParameterName("InitialSlide");
     }
 
     [Theory]
@@ -200,11 +200,11 @@ public class BzCarouselAdvancedTests : TestBase
     #region Loop Behavior Tests
 
     [Theory]
-    [InlineData(1, 3, false)]
-    [InlineData(2, 3, false)]
-    [InlineData(3, 3, true)]
-    [InlineData(4, 3, true)]
-    public void BzCarousel_LoopBehavior_ShouldRespectMinItemsForLoop(int itemCount, int minItems, bool expectedLoopEnabled)
+    [InlineData(1, 3)]
+    [InlineData(2, 3)]
+    [InlineData(3, 3)]
+    [InlineData(4, 3)]
+    public void BzCarousel_LoopBehavior_ShouldAcceptMinItemsForLoop(int itemCount, int minItems)
     {
         // Arrange
         var items = Enumerable.Range(1, itemCount)
@@ -217,11 +217,11 @@ public class BzCarouselAdvancedTests : TestBase
             .Add(p => p.Loop, true)
             .Add(p => p.MinItemsForLoop, minItems));
 
-        // Assert - verify Loop parameter is set (actual loop behavior depends on JS)
+        // Assert - Just verify it renders without error
+        // Note: ShouldEnableLoop is private, we test that Loop parameter is set
         cut.Instance.Loop.Should().BeTrue();
-        // The expectedLoopEnabled indicates whether looping should actually occur
-        // based on itemCount >= minItems: this is verified by checking the component state
-        (itemCount >= minItems).Should().Be(expectedLoopEnabled);
+        cut.Instance.MinItemsForLoop.Should().Be(minItems);
+        cut.Find(".bzc-carousel-box").Should().NotBeNull();
     }
 
     [Fact]

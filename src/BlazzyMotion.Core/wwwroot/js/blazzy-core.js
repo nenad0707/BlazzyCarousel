@@ -1,4 +1,3 @@
-
 let swiperLoaded = false;
 const swiperInstances = new Map();
 
@@ -99,7 +98,7 @@ const DEFAULT_TOUCH_SETTINGS = {
 // CAROUSEL INITIALIZATION
 
 
-export async function initializeCarousel(element, optionsJson) {
+export async function initializeCarousel(element, optionsJson, dotNetRef = null) {
     try {
         const container = element.querySelector(".swiper-container");
 
@@ -199,6 +198,20 @@ export async function initializeCarousel(element, optionsJson) {
                     }
                 },
 
+
+                slideChange: function () {
+                    if (dotNetRef) {
+                        const realIndex = this.realIndex;
+                        dotNetRef.invokeMethodAsync('OnSlideChangeFromJS', realIndex)
+                            .catch(err => {
+                                // Ignore errors during disposal
+                                if (!err.message?.includes('disposed')) {
+                                    console.warn('[BlazzyMotion] slideChange callback error:', err);
+                                }
+                            });
+                    }
+                },
+
                 // Prevent multiple rapid transitions
                 touchStart: function () {
                     // Add flag to track touch state
@@ -235,7 +248,6 @@ export function destroyCarousel(element) {
         swiperInstances.delete(element);
     }
 }
-
 
 export function getActiveIndex(element) {
     if (swiperInstances.has(element)) {

@@ -6,7 +6,6 @@ using BlazzyMotion.Core.Services;
 using BlazzyMotion.Core.Templates;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Microsoft.Win32;
 using System.Text.Json;
 
 namespace BlazzyMotion.Carousel.Components;
@@ -72,9 +71,54 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
 
     /// <summary>
     /// Callback invoked when an item is clicked/selected.
+    /// When <see cref="SelectOnScroll"/> is true, also fires on scroll/swipe.
     /// </summary>
     [Parameter]
     public EventCallback<TItem> OnItemSelected { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the active item changes due to scroll/swipe.
+    /// Always fires on scroll regardless of <see cref="SelectOnScroll"/> setting.
+    /// </summary>
+    /// <remarks>
+    /// Use this for lightweight operations like updating a preview panel.
+    /// For navigation or API calls, prefer <see cref="OnItemSelected"/> with
+    /// <see cref="SelectOnScroll"/> set to false.
+    /// </remarks>
+    [Parameter]
+    public EventCallback<TItem> OnActiveItemChanged { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the active slide index changes.
+    /// Provides the zero-based index of the newly active slide.
+    /// </summary>
+    [Parameter]
+    public EventCallback<int> OnActiveIndexChanged { get; set; }
+
+    /// <summary>
+    /// When true, <see cref="OnItemSelected"/> fires on scroll/swipe in addition to click.
+    /// Default is true for zero-config behavior.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Set to false if <see cref="OnItemSelected"/> triggers navigation or API calls,
+    /// to prevent unwanted side effects during scrolling.
+    /// </para>
+    /// <para>
+    /// <strong>Example:</strong>
+    /// <code>
+    /// // For preview updates (keep default true):
+    /// &lt;BzCarousel Items="movies" OnItemSelected="@(m => selectedMovie = m)" /&gt;
+    /// 
+    /// // For navigation (set to false):
+    /// &lt;BzCarousel Items="movies" 
+    ///              SelectOnScroll="false" 
+    ///              OnItemSelected="@(m => Navigation.NavigateTo($"/movie/{m.Id}"))" /&gt;
+    /// </code>
+    /// </para>
+    /// </remarks>
+    [Parameter]
+    public bool SelectOnScroll { get; set; } = true;
 
     /// <summary>
     /// Custom loading template.
@@ -161,6 +205,12 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
     private int? _lastItemCount;
     private string? _lastOptionsSnapshot;
     private int? _lastKeyParamsHash;
+    private DotNetObjectReference<BzCarousel<TItem>>? _dotNetRef;
+
+    /// <summary>
+    /// Cached items list for O(1) index access in JS callbacks.
+    /// </summary>
+    private IReadOnlyList<TItem> _itemsCache = Array.Empty<TItem>();
 
     /// <summary>
     /// Cached mapped items from BzRegistry.
@@ -206,24 +256,22 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
     {
         ValidateParameters();
 
-        // ─────────────────────────────────────────────────────────────────
-        // DETERMINE RENDERING STRATEGY
-        // ─────────────────────────────────────────────────────────────────
+        // Cache items for O(1) access in JS callbacks
+        _itemsCache = Items != null ? Items.ToList() : Array.Empty<TItem>();
+
+        // Determine rendering strategy
         if (ItemTemplate != null)
         {
-            // User provided custom template - use it directly
             _useRegistryMapping = false;
             _mappedItems = Array.Empty<BzItem>();
         }
         else if (Items != null && BzRegistry.HasMapper<TItem>())
         {
-            // No custom template, but we have a registered mapper
             _useRegistryMapping = true;
             _mappedItems = BzRegistry.ToBzItems(Items);
         }
         else
         {
-            // No template, no mapper - will use fallback
             _useRegistryMapping = false;
             _mappedItems = Array.Empty<BzItem>();
         }
@@ -241,14 +289,17 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
 
         if (!IsEmpty && !_initialized)
         {
+            _initialized = true;
             try
             {
+                _dotNetRef = DotNetObjectReference.Create(this);
                 _jsInterop ??= new BzCarouselJsInterop(JS);
-                await _jsInterop.InitializeAsync(_carouselRef, BuildOptions());
+                await _jsInterop.InitializeAsync(_carouselRef, BuildOptions(), _dotNetRef);
                 _initialized = true;
             }
             catch (Exception ex)
             {
+                _initialized = false;
                 Console.Error.WriteLine($"[BzCarousel] Initialization error: {ex.Message}");
             }
         }
@@ -258,7 +309,9 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
             try
             {
                 await _jsInterop!.DestroyAsync();
-                await _jsInterop.InitializeAsync(_carouselRef, BuildOptions());
+                _dotNetRef?.Dispose();
+                _dotNetRef = DotNetObjectReference.Create(this);
+                await _jsInterop.InitializeAsync(_carouselRef, BuildOptions(), _dotNetRef);
                 _needsReinit = false;
             }
             catch (Exception ex)
@@ -274,30 +327,61 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
 
     #endregion
 
+    #region JS Invokable Methods
+
+    /// <summary>
+    /// Called from JavaScript when the active slide changes.
+    /// </summary>
+    /// <param name="realIndex">The real index of the active slide (accounts for loop clones)</param>
+    [JSInvokable]
+    public async Task OnSlideChangeFromJS(int realIndex)
+    {
+        if (IsDisposed) return;
+        if (realIndex < 0 || realIndex >= _itemsCache.Count) return;
+
+        var item = _itemsCache[realIndex];
+
+        // Always fire OnActiveIndexChanged
+        if (OnActiveIndexChanged.HasDelegate)
+        {
+            await OnActiveIndexChanged.InvokeAsync(realIndex);
+        }
+
+        // Always fire OnActiveItemChanged
+        if (OnActiveItemChanged.HasDelegate)
+        {
+            await OnActiveItemChanged.InvokeAsync(item);
+        }
+
+        // Fire OnItemSelected only if SelectOnScroll is true
+        if (SelectOnScroll && OnItemSelected.HasDelegate)
+        {
+            await OnItemSelected.InvokeAsync(item);
+        }
+
+        await InvokeStateHasChangedAsync();
+    }
+
+    #endregion
+
     #region Rendering Methods
 
     /// <summary>
     /// Gets the RenderFragment for a specific item.
     /// </summary>
-    /// <param name="item">The original item</param>
-    /// <param name="index">Index in the collection</param>
-    /// <returns>RenderFragment to render the item</returns>
     private RenderFragment GetItemContent(TItem item, int index)
     {
-        // Priority 1: User-provided template
         if (ItemTemplate != null)
         {
             return ItemTemplate(item);
         }
 
-        // Priority 2: BzRegistry mapped item
         if (_useRegistryMapping && index < _mappedItems.Count)
         {
             var bzItem = _mappedItems[index];
             return BzTemplateFactory.CreateImage()(bzItem);
         }
 
-        // Priority 3: Fallback
         return BzTemplateFactory.CreateGenericFallback<TItem>()(item);
     }
 
@@ -362,7 +446,7 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
     {
         var currentItemCount = ItemCount;
         var optionsSnapshot = Options != null ? JsonSerializer.Serialize(Options) : null;
-        var keyParamsHash = HashCode.Combine(Loop, RotateDegree, Depth, MinItemsForLoop, MinItemsForCoverflow);
+        var keyParamsHash = HashCode.Combine(Loop, RotateDegree, Depth, MinItemsForLoop, MinItemsForCoverflow, SelectOnScroll);
 
         if (currentItemCount == 0)
         {
@@ -405,19 +489,19 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
     private void ValidateParameters()
     {
         if (RotateDegree < 0 || RotateDegree > 360)
-            throw new ArgumentOutOfRangeException(nameof(RotateDegree), "Must be between 0 and 360.");
+            throw new ArgumentOutOfRangeException(nameof(RotateDegree), "RotateDegree must be between 0 and 360 degrees.");
 
         if (Depth < 0)
-            throw new ArgumentOutOfRangeException(nameof(Depth), "Must be non-negative.");
+            throw new ArgumentOutOfRangeException(nameof(Depth), "Depth must be a non-negative value.");
 
         if (MinItemsForLoop < 1)
-            throw new ArgumentOutOfRangeException(nameof(MinItemsForLoop), "Must be at least 1.");
+            throw new ArgumentOutOfRangeException(nameof(MinItemsForLoop), "MinItemsForLoop must be at least 1.");
 
         if (MinItemsForCoverflow < 1)
-            throw new ArgumentOutOfRangeException(nameof(MinItemsForCoverflow), "Must be at least 1.");
+            throw new ArgumentOutOfRangeException(nameof(MinItemsForCoverflow), "MinItemsForCoverflow must be at least 1.");
 
         if (InitialSlide < 0)
-            throw new ArgumentOutOfRangeException(nameof(InitialSlide), "Must be non-negative.");
+            throw new ArgumentOutOfRangeException(nameof(InitialSlide), "InitialSlide must be a non-negative value.");
     }
 
     #endregion
@@ -429,6 +513,8 @@ public partial class BzCarousel<TItem> : BzComponentBase where TItem : class
     /// </summary>
     protected override async ValueTask DisposeAsyncCore()
     {
+        _dotNetRef?.Dispose();
+
         if (_jsInterop != null)
         {
             await _jsInterop.DisposeAsync();
