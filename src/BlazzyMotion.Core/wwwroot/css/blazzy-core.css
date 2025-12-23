@@ -1,5 +1,16 @@
 ﻿/* CSS VARIABLES (Design Tokens) */
 
+[class*="bz"],
+[class*="bz"] * {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+}
+
+[class*="bz"]:focus,
+[class*="bz"] *:focus {
+    outline: none;
+}
+
 :root {
     /* BASE VALUES */
     --bz-border-radius: 12px;
@@ -8,32 +19,26 @@
     --bz-padding-mobile: 15px;
     --bz-min-height: 400px;
     --bz-transition-speed: 0.3s;
-   
     /*CONTAINER DIMENSIONS */
     --bz-container-max-width: 800px;
     --bz-container-max-width-tablet: 750px;
     --bz-container-max-width-mobile: 350px;
-    
     /* SWIPER HEIGHTS */
     --bz-swiper-height: 400px;
     --bz-swiper-height-tablet: 300px;
     --bz-swiper-height-mobile: 250px;
-   
     /* SLIDE DIMENSIONS */
     --bz-slide-width: 180px;
     --bz-slide-width-tablet: 150px;
     --bz-slide-width-mobile: 100px;
-  
     /* IMAGE DIMENSIONS */
     --bz-image-max-width: 160px;
     --bz-image-max-width-tablet: 140px;
     --bz-image-max-width-mobile: 90px;
-    
     /* EFFECTS */
     --bz-hover-scale: 1.05;
     --bz-active-scale: 1.1;
     --bz-transition-duration: 0.3s;
-   
     /* CAROUSEL SPECIFIC (bzc- prefix) - BACKWARD COMPATIBLE */
     --bzc-border-radius: var(--bz-border-radius);
     --bzc-padding: var(--bz-padding);
@@ -43,19 +48,16 @@
     --bzc-hover-scale: var(--bz-hover-scale);
     --bzc-active-scale: var(--bz-active-scale);
     --bzc-transition-duration: var(--bz-transition-duration);
-  
     /* GLASS THEME VARIABLES */
     --bzc-glass-bg: rgba(15, 15, 15, 0.6);
     --bzc-glass-border: rgba(255, 255, 255, 0.15);
     --bzc-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     --bzc-glass-blur: 12px;
-    
     /* DARK THEME VARIABLES */
     --bzc-dark-border: rgba(255, 255, 255, 0.08);
     --bzc-dark-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     --bzc-dark-bg: linear-gradient(135deg, rgba(20, 20, 25, 0.98), rgba(30, 30, 40, 0.98));
     --bzc-dark-glow: 0 0 30px rgba(100, 100, 255, 0.15);
-    
     /* LIGHT THEME VARIABLES */
     --bzc-light-bg: rgba(255, 255, 255, 0.98);
     --bzc-light-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);

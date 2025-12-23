@@ -48,6 +48,7 @@
 }
 
 @media (max-width: 768px) {
+
     .bz-sidebar__version {
         justify-content: center;
     }

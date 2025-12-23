@@ -32,20 +32,15 @@
 
 <DocSection Title="Configuration" Icon="⚙️">
     <p>BlazzyMotion uses Source Generators, so there's <strong>no service registration required!</strong></p>
-    <p>Just add the CSS reference to your <code>index.html</code>:</p>
+    <p><strong>CSS is automatically included</strong> - no manual setup needed! ✨</p>
 
-    <CodeBlock Language="html" Code="@_cssImport" />
-
-    <p class="bz-mt-2">Then add the using statement to your <code>_Imports.razor</code>:</p>
-
+    <p class="bz-mt-2">Just add the using statement to your <code>_Imports.razor</code>:</p>
     <CodeBlock Language="razor" Code="@_imports" />
 </DocSection>
 
 <DocSection Title="Verify Installation" Icon="🔍">
     <p>Create a simple test to verify everything is working:</p>
-
     <CodeBlock Language="razor" Code="@_testCode" />
-
     <p class="bz-mt-2">If you see the carousel rendered, you're all set! 🎉</p>
 </DocSection>
 
@@ -65,10 +60,7 @@
 
     private string _pmcInstall = "Install-Package BlazzyMotion.Carousel";
 
-    private string _packageRef = @"<PackageReference Include=""BlazzyMotion.Carousel"" Version=""1.1.0"" />";
-
-    private string _cssImport = @"<link rel=""stylesheet"" href=""_content/BlazzyMotion.Core/blazzy-core.css"" />
-<link rel=""stylesheet"" href=""_content/BlazzyMotion.Carousel/blazzy-carousel.css"" />";
+    private string _packageRef = "<PackageReference Include=\"BlazzyMotion.Carousel\" Version=\"1.1.0\" />";
 
     private string _imports = @"@using BlazzyMotion.Core.Models
 @using BlazzyMotion.Carousel.Components";
@@ -80,13 +72,16 @@
 @code {
     private List<Movie> _movies = new()
     {
-        new Movie { Poster = ""/images/movie1.jpg"", Title = ""Test"" }
+        new Movie { ImageUrl = ""/images/movie1.jpg"", Title = ""Test"" }
     };
 
+    // Define your model with [BzImage] attribute
     public class Movie
     {
-        [BzImage] public string Poster { get; set; } = """";
-        [BzTitle] public string Title { get; set; } = """";
+        [BzImage]
+        public string ImageUrl { get; set; } = """";
+
+        public string Title { get; set; } = """";
     }
 }";
 }
