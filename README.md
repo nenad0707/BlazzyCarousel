@@ -99,6 +99,7 @@ If you see compiler errors after upgrading, simply update your `_Imports.razor`:
   - [Advanced Usage](#advanced-usage)
     - [Custom Item Template](#custom-item-template)
     - [Handling Item Selection](#handling-item-selection)
+    - [Preview Panel Pattern](#preview-panel-pattern)
     - [Advanced Configuration](#advanced-configuration)
     - [Custom Loading State](#custom-loading-state)
     - [Custom Empty State](#custom-empty-state)
@@ -140,7 +141,7 @@ If you see compiler errors after upgrading, simply update your `_Imports.razor`:
 
 ## Live Demo
 
-Experience BlazzyMotion.Carousel in action: **[View Live Demo](https://blazzy-motion.github.io/BlazzyMotion/)**
+Experience BlazzyMotion.Carousel in action: **[View Live Demo](https://blazzymotion.com/)**
 
 ![BlazzyMotion.Carousel Demo](https://raw.githubusercontent.com/Blazzy-Motion/BlazzyMotion/main/docs/images/demo.gif)
 
@@ -240,11 +241,13 @@ The component uses the following priority when selecting a template:
 
 #### Data Parameters
 
-| Parameter        | Type                     | Default      | Description                                                        |
-| ---------------- | ------------------------ | ------------ | ------------------------------------------------------------------ |
-| `Items`          | `IEnumerable<TItem>`     | **Required** | Collection of items to display in the carousel                     |
-| `ItemTemplate`   | `RenderFragment<TItem>?` | `null`       | Custom template for rendering items (overrides generated template) |
-| `OnItemSelected` | `EventCallback<TItem>`   | -            | Callback invoked when an item is clicked                           |
+| Parameter              | Type                     | Default      | Description                                                        |
+| ---------------------- | ------------------------ | ------------ | ------------------------------------------------------------------ |
+| `Items`                | `IEnumerable<TItem>`     | **Required** | Collection of items to display in the carousel                     |
+| `ItemTemplate`         | `RenderFragment<TItem>?` | `null`       | Custom template for rendering items (overrides generated template) |
+| `OnItemSelected`       | `EventCallback<TItem>`   | -            | Callback invoked when an item is clicked                           |
+| `OnActiveItemChanged`  | `EventCallback<TItem>`   | -            | Callback fired on every scroll/swipe, ideal for preview panels     |
+| `OnActiveIndexChanged` | `EventCallback<int>`     | -            | Callback fired with zero-based slide index on change               |
 
 #### Appearance Parameters
 
@@ -261,6 +264,7 @@ The component uses the following priority when selecting a template:
 | `Loop`                 | `bool` | `true`  | Enable infinite loop navigation                               |
 | `InitialSlide`         | `int`  | `0`     | Index of the initially active slide                           |
 | `MinItemsForLoop`      | `int`  | `4`     | Minimum items required to enable loop mode                    |
+| `SelectOnScroll`       | `bool` | `true`  | When false, OnItemSelected fires only on click, not on scroll |
 | `AutoDetectMode`       | `bool` | `true`  | Automatically switch between coverflow and simple modes       |
 | `MinItemsForCoverflow` | `int`  | `4`     | Minimum items for coverflow effect (below uses simple slider) |
 
@@ -273,11 +277,12 @@ The component uses the following priority when selecting a template:
 
 #### Advanced Parameters
 
-| Parameter         | Type                 | Default | Description                                                 |
-| ----------------- | -------------------- | ------- | ----------------------------------------------------------- |
-| `Options`         | `BzCarouselOptions?` | `null`  | Advanced carousel options (overrides individual parameters) |
-| `LoadingTemplate` | `RenderFragment?`    | `null`  | Custom loading state template                               |
-| `EmptyTemplate`   | `RenderFragment?`    | `null`  | Custom empty state template                                 |
+| Parameter              | Type                          | Default | Description                                                     |
+| ---------------------- | ----------------------------- | ------- | --------------------------------------------------------------- |
+| `Options`              | `BzCarouselOptions?`          | `null`  | Advanced carousel options (overrides individual parameters)     |
+| `LoadingTemplate`      | `RenderFragment?`             | `null`  | Custom loading state template                                   |
+| `EmptyTemplate`        | `RenderFragment?`             | `null`  | Custom empty state template                                     |
+| `AdditionalAttributes` | `Dictionary<string, object>?` | `null`  | HTML attributes to splat onto root element (id, aria-_, data-_) |
 
 ## Attributes
 
@@ -422,6 +427,36 @@ React to user clicks on carousel items:
     {
         Console.WriteLine($"Selected: {movie.Title}");
         // Navigate, open modal, etc.
+    }
+}
+```
+
+### Preview Panel Pattern
+
+Use `OnActiveItemChanged` for live preview while browsing, and `SelectOnScroll="false"` when click means navigation:
+
+```razor
+<BzCarousel Items="movies"
+            SelectOnScroll="false"
+            OnItemSelected="NavigateToMovie"
+            OnActiveItemChanged="ShowPreview" />
+
+<div class="preview-panel">
+    @if (previewMovie != null)
+    {
+        <h3>@previewMovie.Title</h3>
+        <p>@previewMovie.Description</p>
+    }
+</div>
+
+@code {
+    private Movie? previewMovie;
+
+    private void ShowPreview(Movie movie) => previewMovie = movie;
+
+    private void NavigateToMovie(Movie movie)
+    {
+        Navigation.NavigateTo($"/movie/{movie.Id}");
     }
 }
 ```

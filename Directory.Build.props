@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
-    <BlazzyCoreVersion Condition="'$(BlazzyCoreVersion)' == ''">1.1.0-preview1</BlazzyCoreVersion>
-    <BlazzyCarouselVersion Condition="'$(BlazzyCarouselVersion)' == ''">1.2.0-preview1</BlazzyCarouselVersion>
+    <BlazzyCoreVersion Condition="'$(BlazzyCoreVersion)' == ''">1.1.0</BlazzyCoreVersion>
+    <BlazzyCarouselVersion Condition="'$(BlazzyCarouselVersion)' == ''">1.2.0</BlazzyCarouselVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -9,8 +9,8 @@
     <Company>BlazzyMotion</Company>
     <Copyright>Copyright © 2025 BlazzyMotion</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://blazzy-motion.github.io/BlazzyMotion/</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Blazzy-Motion/BlazzyMotion</RepositoryUrl>
+    <PackageProjectUrl>https://blazzymotion.com/</PackageProjectUrl>
+    <RepositoryUrl>https://blazzymotion.com/</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 

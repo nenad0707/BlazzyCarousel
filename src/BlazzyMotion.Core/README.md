@@ -50,7 +50,7 @@ public partial class MyCustomComponent<TItem> : BzComponentBase
 
 ## Related Packages
 
-- [BlazzyMotion.Carousel](https://www.nuget.org/packages/BlazzyMotion.Carousel/) - 3D Coverflow carousel component
+- [BlazzyMotion.Carousel](https://blazzymotion.com/) - 3D Coverflow carousel component
 
 ## Documentation
 
